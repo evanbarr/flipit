@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html onclick="pageClick()" onkeydown="keyDown()">
+<head>
+    <title>Flip.IT</title>
+</head>
+<body onresize="resize()">
+
+<style>
+    body {
+        margin-top:0px;
+        margin-left:0px;
+        overflow:hidden;
+    }
+    label {
+        user-select:none;
+    }
+    #myCanvas {
+        border:0px solid; 
+        position:relative; 
+        left:10px; 
+        top:50px;
+    }
+    #objective {
+        margin-top:10px;
+        margin-bottom:15px;
+        padding:5px;
+        background-color:white;
+    }
+    input[type="checkbox"] {
+        width:18px;
+        height:18px;
+    }
+    [title]:hover::after {
+        content: attr(title);
+        background-color:green;
+    }
+    .statusLine {
+        position:relative;
+        top:20px;
+        left:20px;
+        font-size:18px;
+    }
+    .button {
+        width:100px;
+    }
+    .menuicon {
+        position:absolute;
+        display:block;
+        right:0px;
+        top:20px;
+        padding:5px;
+        font-size:17px;
+    }
+    .menuicon:hover {
+        background-color:#ddd;
+        color:black;
+    }
+    .menuContent {
+        position:absolute;
+        display:none;
+        width:150px;
+        right:0;
+        padding:5px;
+        z-index:100;
+        background:gray;
+    }
+    .menuItem {
+        width:100%;
+        height:20px;
+        margin:3px auto;
+    }
+    .menuText {
+        color:white;
+    }
+    #utcdate {
+        position:absolute;
+        left:332px;
+        top:47px;
+        font-weight:bold;
+        font-size:12px;
+        overflow:hidden;
+        user-select:none; 
+    }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div style="width:100%">
+<div style="position:absolute; top:0px; left:0px;">
+    <label class="statusLine" style="font-weight:bold; left:10px;">Moves: </label><label id="moves" class="statusLine" style="left:10px;"></label>
+    <button id="reset" class="statusLine button">Reset</button>
+    <button id="undo" class="statusLine button" disabled="disabled">Undo Last</button>
+
+    <label class="statusLine" for="puzzleNo" style="font-weight:bold; left:50px;">Puzzle #: </label>
+    <input id="puzzleNo" class="statusLine" style="left:50px; width:80px;" title="Enter a number and hit {Enter} to select a specific puzzle"></input>
+    <span class="statusLine" id="utcdate"></span>
+
+    <!-- "Help icon" -->
+    <a id="helpParent" class="menuicon" style="right:40px;" onclick="showHelp()">
+        <i id="helpParent" class="fa fa-question-circle"></i>
+        <div id="help" class="menuContent menuText" style="width:200px;">
+            The objective is to get the puzzle to look like this:<br/>
+            <canvas id="objective">Your browser does not support the HTML5 canvas tag.</canvas>
+            <br/>
+            Click on a circle to flip its color and the color of all adjacent circles.
+            This includes circles at the diagonals.<br/>
+            <br/>
+            All puzzles can be solved in 3 or fewer moves.<br/>
+            <br/>
+            You can choose between today's puzzle
+            and unlimited random puzzles.  You can also select a puzzle by its number.  This allows
+            you to solve the same puzzle as your friends.<br/>
+            <br/>
+            For the puzzle published in the August 2023 Mensa Bulletin, enter puzzle #48449.
+        </div>
+    </a>
+    
+    <!-- "Hamburger menu" / "Bar icon" to toggle the navigation links -->
+    <a id="topMenuParent" class="menuicon" onclick="showMenu()">
+        <i id="topMenuParent" class="fa fa-bars"></i>
+        <div id="topMenu" class="menuContent">
+            <button id="target" class="menuItem" onclick="btnTarget()">Show Target</button>
+            <button id="random" class="menuItem" onclick="btnRandom()">Random Puzzle</button>
+            <button id="todays" class="menuItem" onclick="btnTodaysPuzzle()">Today's Puzzle</button>        
+
+            <hr/>
+            <input type="checkbox" id="diagonals" class="menuItem" checked>
+            <label for="diagonals" class="menuItem menuText">Include Diagonals</label>
+        </div>
+    </a>
+    
+    <br/>
+    <canvas id="myCanvas">Your browser does not support the HTML5 canvas tag.</canvas>
+</div>
+</div>
+
+
+<script>
+"use strict";
+
+// Globals
+const mBorderLeft = 10, mBorderRight=10, mBorderTop = 80, mBorderBottom = 10;  // left and top must match the actual position for canvas element from html above.
+const mMinWidth = 574;  // Canvas minimum width to prevent toolbar from getting messy.
+const testPattern = [1,0,0,0,0,0,1,0,1,0,1,1,1,1,0,1];
+const mTargetPattern = [1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1];
+const mTargetPuzzleNo = patternToNumber(mTargetPattern);
+
+const colorBackground = "white", colorForground = "black", colorClicked = "lightcyan";  //greenyellow
+
+var mBoxWidth = 0, mRadius = 0;
+
+const mlblMoves = document.getElementById("moves");
+var mMoves = 0, mIncludeDiagonals = true;
+var mLastX = 0, mLastY = 0;
+
+const minpPuzzleNo = document.getElementById("puzzleNo");
+const mCanvas = document.getElementById("myCanvas");
+const mContext = mCanvas.getContext("2d");
+mContext.lineWidth = 1;
+mContext.fillStyle = colorForground;
+
+var mInitialized = false;
+
+var mCircleArray;
+var mCurrentPattern;
+
+
+mCanvas.left = mBorderLeft;
+mCanvas.top = mBorderTop;
+
+
+drawObjective(document.getElementById("objective"), mTargetPattern, 190)
+
+var mStartPattern = testPattern;
+drawCanvas(mStartPattern);
+
+
+
+// ------------------------
+// Events
+//
+// Canvas Mouse-click event
+mCanvas.addEventListener("mousedown", function(e) {
+    const [x, y] = getMousePosition(mCanvas, e);
+    hideAllMenus();
+    //addMove();
+    flipCircles(Math.floor(x/mBoxWidth), Math.floor(y/mBoxWidth), true);
+    if (mTargetPuzzleNo == patternToNumber(mCurrentPattern)) { 
+        blinkCircles();
+    }
+});
+
+
+// Reset button event
+document.getElementById("reset").addEventListener("click", function(e) {
+    resetCircles(mStartPattern);
+});
+
+
+// Undo button event
+document.getElementById("undo").addEventListener("click", function(e) {
+    Undo(e.target);
+});
+
+
+// puzzle number change event
+document.getElementById("puzzleNo").addEventListener("change", function(e) {
+    mStartPattern = numberToPattern(e.target.value);
+    resetCircles(mStartPattern);
+    document.getElementById("utcdate").innerText = "";
+});
+
+
+// diagonals choice change event
+document.getElementById("diagonals").addEventListener("change", function(e) {
+    mIncludeDiagonals = e.target.checked;
+});
+
+
+
+// ------------------------
+// Menu functions
+//
+function Undo(undoButton) {
+    //subtractMove();
+    flipCircles(mLastX, mLastY, true);
+    undoButton.disabled = "disabled";
+}
+
+
+
+function btnTarget() {
+    // Show the target pattern
+    mStartPattern = mTargetPattern;
+    resetCircles(mTargetPattern);
+    document.getElementById("utcdate").innerText = "";
+}
+
+
+function btnRandom() {
+    // Starting with the target solution, click 3 random circles to get a randum starting position
+    mStartPattern = randomStart(mTargetPattern);
+    resetCircles(mStartPattern);
+    document.getElementById("utcdate").innerText = "";
+}
+
+
+function btnTodaysPuzzle() {
+    // Uses today's date to generate a new starting puzzle
+    mStartPattern = todaysStart(mTargetPattern);
+    resetCircles(mStartPattern);
+    document.getElementById("utcdate").innerText = "Puzzle for " + utcDateText();
+}
+
+
+function numberToPattern(number) {
+    let bits = (n,b=32) => [...Array(b)].map((x,i)=>(n>>i)&1);
+    let Bitarr = bits(number,16);
+    return Bitarr;
+}
+function patternToNumber(pattern) {
+    const binaryString = pattern.slice().reverse().join("");
+    return parseInt(binaryString, 2);
+}
+
+
+
+// ------------------------
+// Page functions
+//
+function resize() {
+    drawCanvas(undefined, false)
+}
+
+
+function pageClick(e) {
+    const evtobj = e || window.event;
+    let id = evtobj.target.id;
+    if (id.endsWith("Parent")) {id = id.substring(0, id.length - 6);}
+    hideAllMenus(id);
+}
+
+
+function keyDown(e) {
+    var evtobj = window.event? event : e
+    if (evtobj.keyCode == 90 && evtobj.ctrlKey) {
+        var btn = document.getElementById("undo");
+        if (btn.disabled != true) {Undo(btn);}
+    }
+}
+
+
+function showMenu() {showHiddenElement("topMenu");}
+function showHelp() {showHiddenElement("help")}
+function showHiddenElement(elementId, forceHide) {
+	// Set forceHide = true to not show element if it is already hidden
+    if (typeof forceHide === 'undefined') {forceHide = false;}
+
+    var x = document.getElementById(elementId);
+    if (x.style.display === "block") {
+        x.style.display = "none";
+    } else if (forceHide === false) {
+        x.style.display = "block";
+    }
+}
+function hideAllMenus(currentId) {
+    if (typeof currentId === 'undefined') {currentId = "";}
+
+    // Close all menus except the one that was clicked
+    if (currentId != "topMenu") showHiddenElement("topMenu", true);
+    if (currentId != "help") showHiddenElement("help", true);
+}
+
+
+
+// ------------------------
+// Canvas functions
+//
+function drawCanvas(pattern, initialize) {
+    const circlePadding = .25;
+    if (typeof initialize === 'undefined') {initialize = true;}
+
+    // Set the canvas size to fill the entire window (minus the canvas border)
+    let viewWidth = window.innerWidth - (mBorderLeft + mBorderRight);
+    let viewHeight = window.innerHeight - (mBorderTop + mBorderBottom);
+
+
+    // Set canvas to be a square shape
+    if (viewHeight < viewWidth) {
+        viewWidth = viewHeight;
+    //} else if (viewWidth < viewHeight) {
+    //    viewHeight = viewWidth;
+    }
+    if (viewWidth < mMinWidth) {viewWidth = mMinWidth;}
+    mCanvas.height = viewWidth;
+    mCanvas.width = viewWidth;
+
+    if (initialize === false) {
+        mContext.clearRect(0, 0, viewWidth, viewWidth);
+    }
+
+
+    // Draw a 4 x 4 grid that fills the window
+    mBoxWidth = Math.floor(viewWidth / 4);  // Width of one cell
+    mRadius = (mBoxWidth - circlePadding * mBoxWidth) / 2;
+    drawGrid(mContext, 4, 4, mBoxWidth);
+
+
+    // Draw circles
+    if (initialize === true) {
+        mCircleArray = [];
+        initCircles(pattern);
+        mCurrentPattern = pattern.slice();
+    } else {
+        mCircleArray.forEach(drawCircle);
+    }
+}
+function drawObjective(canvas, pattern, width) {
+    canvas.width = width;
+    canvas.height = width;
+
+    // Draw a 4 x 4 grid that fills the window
+    const boxWidth = width / 4;  // Width of one cell
+    const context = canvas.getContext("2d");
+    drawGrid(context, 4, 4, boxWidth);
+
+    // Draw circles
+    let circleArray = [];
+    var pIndex = 0;
+    for (let y=0; y<4; y++) {
+        for (let x=0; x<4; x++) {
+            circleArray.push(new Circle(x, y, pattern[pIndex]));
+            pIndex++;
+        }
+    }
+
+    const radius = (boxWidth - .25 * boxWidth) / 2;
+    const params = {isBlink:false, boxWidth:boxWidth, radius:radius, context:context};
+    circleArray.forEach(drawCircle, params);
+}
+
+
+function drawGrid(context, columns, rows, boxWidth,   lineWidth, color) {
+	if (typeof lineWidth === 'undefined') {lineWidth = 1;}
+	if (typeof color === 'undefined') {color = colorForground;}
+
+	context.beginPath();
+	context.lineWidth=lineWidth;
+	context.strokeStyle=color;
+
+	// Draw vertical lines
+    let lineLength = boxWidth * rows;
+    for (let i = 0; i <= columns; i++) {
+		context.moveTo(i * boxWidth, 0);
+		context.lineTo(i * boxWidth, lineLength);
+	}
+
+	// Draw horizontal lines
+	lineLength = boxWidth * columns;
+	for (let i = 0; i <= rows; i++) {
+		context.moveTo(0, i * boxWidth);
+		context.lineTo(lineLength, i * boxWidth);
+	}
+
+	context.stroke();
+}
+
+
+function getMousePosition(canvas, event) {
+    let rect = canvas.getBoundingClientRect();
+    let x = event.clientX - rect.left;
+    let y = event.clientY - rect.top;
+    return [x, y];
+}
+
+
+function addMove() {
+    mMoves++;
+    mlblMoves.innerText = mMoves;
+}
+function subtractMove() {
+    mMoves--;
+    mlblMoves.innerText = mMoves;
+}
+
+
+function Circle(x,y,isFilled,clicked) {
+    this.boxX = x;
+    this.boxY = y;
+    this.isFilled = isFilled;
+    if (typeof clicked === 'undefined') {clicked = false;}
+    this.clicked = clicked;
+}
+
+
+function drawCircle(o) {
+	let isBlink = false, boxWidth = mBoxWidth, radius = mRadius, context = mContext;
+    if (typeof this != 'undefined') {
+        if (typeof this.isBlink != 'undefined') {isBlink = this.isBlink;}
+        if (typeof this.boxWidth != 'undefined') {boxWidth = this.boxWidth;}
+        if (typeof this.radius != 'undefined') {radius = this.radius;}
+        if (typeof this.context != 'undefined') {context = this.context;}
+    }
+
+    const circleX = o.boxX * boxWidth + boxWidth / 2
+    const circleY = o.boxY * boxWidth + boxWidth / 2
+
+    context.beginPath();
+    context.arc(circleX, circleY, radius, 0, Math.PI*2, true);
+    context.closePath();
+
+    let isFilled = o.isFilled;
+    if (isBlink==true) {isFilled = 1 - isFilled;}
+
+    if (isFilled === 1) {
+        context.fill();
+    } else {
+        if (mInitialized===true) {
+            context.fillStyle = colorBackground;
+            context.fill();
+            context.fillStyle = colorForground;
+        }
+        context.stroke();
+    }
+}
+
+
+function clickCircle(o) {
+    // Set or unset a highlighted background for this circle's square.
+    const border = 1;
+
+    if (o.clicked === true) {
+        subtractMove();
+        o.clicked = false;
+        mContext.fillStyle = colorBackground;
+    } else {
+        addMove();
+        o.clicked = true;
+        mContext.fillStyle = colorClicked;
+    }
+
+    const boxX = o.boxX * mBoxWidth + border;
+    const boxY = o.boxY * mBoxWidth + border;
+    const width = mBoxWidth - border - 1;
+    mContext.fillRect(boxX, boxY, width, width);
+    mContext.fillStyle = colorForground;
+}
+
+
+function initCircles(pattern) {
+    resetCircles(pattern);
+    mInitialized = true;
+}
+function resetCircles(pattern) {
+    mMoves = 0;
+    mlblMoves.innerText = 0;
+
+    var pIndex = 0;
+    for (let y=0; y<4; y++) {
+        for (let x=0; x<4; x++) {
+            if (mInitialized===true) {
+                let circle = mCircleArray[y * 4 + x];
+                circle.isFilled = pattern[pIndex];
+                if (circle.clicked === true) {clickCircle(circle);}
+            } else {
+                mCircleArray.push(new Circle(x, y, pattern[pIndex]));
+            }
+            pIndex++;
+        }
+    }
+
+    mCircleArray.forEach(drawCircle);
+    minpPuzzleNo.value = patternToNumber(pattern);
+    mCurrentPattern = pattern.slice();
+
+    const btnUndo = document.getElementById("undo");
+    btnUndo.disabled = "disabled";
+}
+function blinkCircles() {
+    const params = {isBlink:true};
+
+    mCircleArray.forEach(drawCircle, params);
+    setTimeout(function() {mCircleArray.forEach(drawCircle);}, 50);
+    setTimeout(function() {mCircleArray.forEach(drawCircle, params);}, 100);
+    setTimeout(function() {mCircleArray.forEach(drawCircle);}, 150);
+}
+
+function flipCircles(x, y, isClick) {
+	if (typeof isClick === 'undefined') {isClick = false;}
+
+    const index = y * 4 + x;
+    if (isClick === true) {clickCircle(mCircleArray[index], index);}
+    flipOneCircle(mCircleArray[index], index);
+
+
+    // left
+    if (x > 0) {flipOneCircle(mCircleArray[index-1], index-1);}
+
+    // right
+    if (x < 3) {flipOneCircle(mCircleArray[index+1], index+1);}
+
+    // above
+    if (y > 0) {
+        flipOneCircle(mCircleArray[index-4], index-4);
+
+        if (mIncludeDiagonals===true) {
+            // above left
+            if (x > 0) {flipOneCircle(mCircleArray[index-5], index-5);}
+
+            // above right
+            if (x < 3) {flipOneCircle(mCircleArray[index-3], index-3);}
+        }
+    }
+
+    // below
+    if (y < 3) {
+        flipOneCircle(mCircleArray[index+4], index+4);
+
+        if (mIncludeDiagonals===true) {
+            // below left
+            if (x > 0) {flipOneCircle(mCircleArray[index+3], index+3);}
+
+            // below right
+            if (x < 3) {flipOneCircle(mCircleArray[index+5], index+5);}
+        }
+    }
+
+
+    // Enable undo
+    document.getElementById("undo").disabled = "";
+    mLastX = x;
+    mLastY = y;
+}
+
+function flipOneCircle(oCircle, index) {
+    oCircle.isFilled = 1 - oCircle.isFilled;
+    drawCircle(oCircle);
+    
+    flipOnebit(mCurrentPattern, index);
+}
+function flipOnebit(pattern, index) {
+    pattern[index] = 1 - pattern[index];
+}
+
+
+function randomStart(solution) {return createPuzzle(solution,false);}
+function todaysStart(solution) {return createPuzzle(solution,true);}
+function createPuzzle(solution, useToday) {
+    // If useToday=true, the UTC date is used to generate a seed for the 
+    // psudo random number generater so that the same date always gives
+    // the same sequence of random numbers no mater your timezone.
+    var pattern = solution.slice();
+    var rLast = [-1, -1, -1], r = -1;
+
+    if (useToday === true) {
+        const seed128 = cyrb128(getSeedFromDate());
+        var rand = sfc32(seed128[0], seed128[1], seed128[2], seed128[3]);
+    }
+
+    for (let i=0; i<3; i++) {
+        while (rLast.includes(r) === true) {
+            if (useToday === true) {
+                r = rand();
+            } else {
+                r = Math.random();
+            }
+            r = Math.floor(r * 16);
+        }
+        rLast[i] = r;
+        flipOnebit(pattern, r);
+
+        // Affect other circles
+        const x = r % 4;  // r mod 4 = (0 - 3)
+        const y = Math.floor(r/4);  // = (0 - 3)
+        //alert("r=" + r.toString() + ", x=" + x.toString() + ", y=" + y.toString())
+
+        // Left
+        if (x>0) {flipOnebit(pattern, r-1);
+;}
+
+
+        // Right
+        if (x<3) {flipOnebit(pattern, r+1);}
+
+
+        // Above
+        if (y > 0) {
+            flipOnebit(pattern, r-4);
+            if (mIncludeDiagonals===true) {
+                // Above left
+                if (x>0) {flipOnebit(pattern, r-5);}
+                // Above right
+                if (x<3) {flipOnebit(pattern, r-3);}
+            }
+        }
+
+
+        // Below
+        if (y < 3) {
+            flipOnebit(pattern, r+4);
+            if (mIncludeDiagonals===true) {
+                // Below left
+                if (x>0) {flipOnebit(pattern, r+3);}
+                // Below right
+                if (x<3) {flipOnebit(pattern, r+5);}
+            }
+        }        
+    }  //for
+
+
+    return pattern;
+}
+
+
+// ------------------------
+// Seedable randum number generation
+//
+// To use:
+//    const seed128 = cyrb128(getSeedFromDate());
+//    var rand = sfc32(seed128[0], seed128[1], seed128[2], seed128[3]);
+//    let r = rand();
+
+function cyrb128(str) {
+    // hash function returns array of 4 32bit strings.
+
+    let h1 = 1779033703, h2 = 3144134277,
+        h3 = 1013904242, h4 = 2773480762;
+    for (let i = 0, k; i < str.length; i++) {
+        k = str.charCodeAt(i);
+        h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
+        h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
+        h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
+        h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
+    }
+    h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
+    h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
+    h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
+    h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
+    h1 ^= (h2 ^ h3 ^ h4), h2 ^= h1, h3 ^= h1, h4 ^= h1;
+    return [h1>>>0, h2>>>0, h3>>>0, h4>>>0];
+}
+function sfc32(a, b, c, d) {
+    // Returned function generates a psudo-random number based on a 128 bit seed (that has been separated into 4 32bit values).
+    return function() {
+      a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0; 
+      var t = (a + b) | 0;
+      a = b ^ b >>> 9;
+      b = c + (c << 3) | 0;
+      c = (c << 21 | c >>> 11);
+      d = d + 1 | 0;
+      t = t + d | 0;
+      c = c + t | 0;
+      return (t >>> 0) / 4294967296;
+    }
+}
+function getSeedFromDate() {
+    const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const now = new Date();
+
+    const year = now.getUTCFullYear().toString();
+    const month = months[now.getUTCMonth()];
+    const day = (now.getUTCDate() + 9).toString();  // add 9 to guarantee a 2 digit result.
+    const weekday = weekdays[now.getUTCDay()];
+
+    return day + weekday + month + year;  // order selected with values changing the most at the beginning.
+}
+function utcDateText() {
+    const weekdays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const now = new Date();
+
+    const weekday = weekdays[now.getUTCDay()];
+    const month = months[now.getUTCMonth()];
+    const day = now.getUTCDate().toString();
+    const year = now.getUTCFullYear().toString();
+
+    return weekday + " " + month + " " + day + ", " + year
+}
+</script> 
+
+</body>
+</html>
