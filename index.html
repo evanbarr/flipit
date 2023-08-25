@@ -115,7 +115,7 @@
     @media only screen and (max-width: 507px) {
         #puzzledate {
             left:10px;
-            top:77px;
+            top:79px;
             font-weight:normal;
         }
         .lblPuzzleNo {
@@ -123,7 +123,7 @@
             top:25px;
         }
         #puzzleNo{
-            left:20px !important;
+            left:18px !important;
             top:25px;
         }
     }
@@ -198,6 +198,7 @@
 
 <script>
 "use strict";
+// TODO: Analytics, Ads
 
 // Globals
 const mBorderLeft = 10, mBorderRight=10, mBorderTop = 80, mBorderBottom = 10;  // left and top must match the actual position for canvas element from html above.
@@ -208,50 +209,17 @@ const mTargetPuzzleNo = patternToNumber(mTargetPattern);
 
 const colorBackground = "white", colorForground = "black", colorClicked = "lightcyan";  //greenyellow
 
-var mTodayDateText = "", mTodayPuzzleDate = "1900-01-01"
-const cookieName = "eb-flipit-stats";
-var cookie = {
+const neverPlayed = "1900-01-01";
+var mTodayDateText = "", mTodayPuzzleDate = neverPlayed, isDaily = false;
+const persistName = "eb-flipit-stats";
+var persist = {
     currentStreak: 0,
     maxStreak: 0,
-    winPercentage: 0,
     dailyGamesPlayed: 0,
     dailyGamesWon: 0,
-    LastDate: "1900-01-01"
-};
-function dateDiff(utcdate1, utcdate2) {
-    // Don't need to deal with daylight savings day if dates are already in UTC.
-    const millisecondsPerDay = 1000 * 60 * 60 * 24;
-    const date1 = new Date(utcdate1);
-    const date2 = new Date(utcdate2);
-    const diffTime = Math.abs(date2 - date1);
-    const diffDays = Math.ceil(diffTime / millisecondsPerDay); 
-    return diffDays;
-}
-function getCookie() {
-    var c = window.localStorage.getItem(cookieName) || JSON.stringify(cookie);
-    return JSON.parse(c)
-}
-function updateCookie(e) {
-    var isStreak = false;
-
-
-    var c = getCookie();
-    e.isWin ? (e.isStreak ? c.currentStreak += 1 : c.currentStreak = 1) : (c.currentStreak = 0, c.guesses.fail += 1),
-    c.maxStreak = Math.max(c.currentStreak, c.maxStreak),
-    c.gamesPlayed += 1,
-    c.gamesWon += e.isWin ? 1 : 0,
-    c.winPercentage = Math.round(c.gamesWon / c.gamesPlayed * 100),
-    function (e, a) {
-        var s = y(a, 2),
-        t = s[0],
-        n = s[1];
-        return t !== Ua ? e += t * n : e
-    },
-    function (e) {
-        window.localStorage.setItem(cookieName, JSON.stringify(e))
-    }
-    (n)
-}
+    LastWinDate: neverPlayed,
+    LastPlayDate: neverPlayed
+};   // Win date and play date refer to daily game
 
 var mBoxWidth = 0, mRadius = 0;
 
@@ -276,9 +244,11 @@ mCanvas.top = mBorderTop;
 
 
 drawObjective(document.getElementById("objective"), mTargetPattern, 190)
+//loadPersist();
 
 var mStartPattern = testPattern;
-drawCanvas(mStartPattern);
+//drawCanvas(mStartPattern);   // Replaced with below
+btnTodaysPuzzle(true);   // Always start with the daily puzzle.
 
 
 
@@ -293,6 +263,28 @@ mCanvas.addEventListener("mousedown", function(e) {
     flipCircles(Math.floor(x/mBoxWidth), Math.floor(y/mBoxWidth), true);
     if (mTargetPuzzleNo == patternToNumber(mCurrentPattern)) { 
         blinkCircles();
+
+        const daysSinceLastWin = isDaily ? dateDiff(persist.LastWinDate, mTodayPuzzleDate): 0;
+        if (daysSinceLastWin > 0) {
+            persist.dailyGamesWon++;
+            persist.LastWinDate = mTodayPuzzleDate;
+
+            if (daysSinceLastWin == 1) {
+                persist.currentStreak++;
+            } else {
+                persist.currentStreak = 1;
+            }
+            if (persist.currentStreak > persist.maxStreak) {persist.maxStreak = persist.currentStreak;}
+
+            const winPct = ((100 * (persist.dailyGamesWon / persist.dailyGamesPlayed)) || 0).toString() + "%";
+            document.getElementById("statsPlayed").innerText = persist.dailyGamesPlayed;
+            document.getElementById("statsSolved").innerText = persist.dailyGamesWon;
+            document.getElementById("statsWinPct").innerText = winPct;
+            document.getElementById("statsStreak").innerText = persist.currentStreak;
+            document.getElementById("statsMaxStreak").innerText = persist.maxStreak;
+
+            updatePersisted();
+        }
     }
 });
 
@@ -313,7 +305,6 @@ document.getElementById("undo").addEventListener("click", function(e) {
 document.getElementById("puzzleNo").addEventListener("change", function(e) {
     mStartPattern = numberToPattern(e.target.value);
     resetCircles(mStartPattern);
-    document.getElementById("puzzledate").innerText = "";
     e.target.blur();
 });
 
@@ -340,7 +331,6 @@ function btnTarget() {
     // Show the target pattern
     mStartPattern = mTargetPattern;
     resetCircles(mTargetPattern);
-    document.getElementById("puzzledate").innerText = "";
 }
 
 
@@ -348,16 +338,33 @@ function btnRandom() {
     // Starting with the target solution, click 3 random circles to get a randum starting position
     mStartPattern = randomStart(mTargetPattern);
     resetCircles(mStartPattern);
-    document.getElementById("puzzledate").innerText = "";
 }
 
 
-function btnTodaysPuzzle() {
+function btnTodaysPuzzle(init) {
     // Uses today's date to generate a new starting puzzle
-    mStartPattern = todaysStart(mTargetPattern);
-    resetCircles(mStartPattern);
-    // mTodayDateText gets set by todaysStart()
+    if (typeof init === 'undefined') {init = false;}
+
+    mStartPattern = todaysStart(mTargetPattern);   // Also calls function that sets mTodayPuzzleDate and mTodayDateText.
+
+    if (init === true) {
+        drawCanvas(mStartPattern);
+    } else {
+        resetCircles(mStartPattern);
+    }
+
+    
+    // must be after resetCircles()
     document.getElementById("puzzledate").innerText = "Puzzle for " + mTodayDateText;
+    isDaily = true;
+
+    // If not already played today, update dailyGamesPlayed stat
+    loadPersist();
+    if (dateDiff(mTodayPuzzleDate, persist.LastPlayDate) > 0) {
+        persist.dailyGamesPlayed++;
+        persist.LastPlayDate = mTodayPuzzleDate;
+        updatePersisted();
+    }
 }
 
 
@@ -620,8 +627,10 @@ function resetCircles(pattern) {
     minpPuzzleNo.value = patternToNumber(pattern);
     mCurrentPattern = pattern.slice();
 
-    mMoves = 0;    // Must be after clickCircle
+    mMoves = 0;    // Must be after clickCircle()
     mlblMoves.innerText = 0;
+    document.getElementById("puzzledate").innerText = "";
+    isDaily = false;
 
     const btnUndo = document.getElementById("undo");
     btnUndo.disabled = "disabled";
@@ -820,6 +829,51 @@ function getSeedFromDate() {
     mTodayDateText = weekday + " " + month + " " + nDay.toString() + ", " + year;
     mTodayPuzzleDate = year + "-" + nMonth.toString() + "-" + nDay.toString();
     return day + weekday.substr(0,3) + month.substr(0,3) + year;  // order selected with values changing the most at the beginning.
+}
+
+
+
+// ------------------------
+// data functions
+//
+function dateDiff(utcdate1, utcdate2) {
+    // Don't need to deal with daylight savings day if dates are already in UTC.
+    const millisecondsPerDay = 1000 * 60 * 60 * 24;
+    const date1 = new Date(utcdate1);
+    const date2 = new Date(utcdate2);
+    const diffTime = Math.abs(date2 - date1);
+    const diffDays = Math.ceil(diffTime / millisecondsPerDay); 
+    return diffDays;
+}
+
+
+function loadPersist() {
+    //var data = window.localStorage.getItem(persistName) || JSON.stringify(persist);
+    var data = window.localStorage.getItem(persistName);
+    if (data) {
+        persist = JSON.parse(data);
+    }
+    //localStorage.clear();
+
+    const winPct = ((100 * (persist.dailyGamesWon / persist.dailyGamesPlayed)) || 0).toString() + "%";
+    document.getElementById("statsPlayed").innerText = persist.dailyGamesPlayed;
+    document.getElementById("statsSolved").innerText = persist.dailyGamesWon;
+    document.getElementById("statsWinPct").innerText = winPct;
+    document.getElementById("statsStreak").innerText = persist.currentStreak;
+    document.getElementById("statsMaxStreak").innerText = persist.maxStreak;
+}
+
+
+/* var persist = {
+    currentStreak: 0,
+    maxStreak: 0,
+    dailyGamesPlayed: 0,
+    dailyGamesWon: 0,
+    LastWinDate: "1900-01-01",
+    LastPlayDate: "1900-01-01"
+ */
+function updatePersisted(e) {
+    window.localStorage.setItem(persistName, JSON.stringify(persist));
 }
 </script> 
 
