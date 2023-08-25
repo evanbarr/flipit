@@ -2,6 +2,7 @@
 <html onclick="pageClick()" onkeydown="keyDown()">
 <head>
     <title>Flip.IT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body onresize="resize()">
 
@@ -64,6 +65,20 @@
         z-index:100;
         background:gray;
     }
+    .menuContent h1 {
+        font-size:22px;
+        text-align:center;
+        text-decoration:underline;
+        text-underline-position:under;
+    }
+    .menuLabel {font-weight:bold;}
+    .menuLabel:after {content:':'}
+    .menuContent table {padding:10px;}
+    .menuContent td {padding:10px;}
+    .menuData {
+        font-weight:normal;
+        color:lightcyan;
+    }
     .menuItem {
         width:100%;
         height:20px;
@@ -72,7 +87,7 @@
     .menuText {
         color:white;
     }
-    #utcdate {
+    #puzzledate {
         position:absolute;
         left:332px;
         top:47px;
@@ -80,6 +95,16 @@
         font-size:12px;
         overflow:hidden;
         user-select:none; 
+    }
+    @media only screen and (max-width: 768px) {
+        /* For mobile phones: */
+        #undo {
+            display:none;
+        }
+        #puzzledate {
+            left:230px;
+            font-size:16px;
+        }
     }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -92,10 +117,25 @@
 
     <label class="statusLine" for="puzzleNo" style="font-weight:bold; left:50px;">Puzzle #: </label>
     <input id="puzzleNo" class="statusLine" style="left:50px; width:80px;" title="Enter a number and hit {Enter} to select a specific puzzle"></input>
-    <span class="statusLine" id="utcdate"></span>
+    <span class="statusLine" id="puzzledate"></span>
 
+    <!-- "Stats icon" -->
+    <a id="statsParent" class="menuicon" style="right:60px;" onclick="showStats()">
+        <i id="statsParent" class="fa fa-line-chart"></i>
+        <div id="stats" class="menuContent menuText" style="width:300px;">
+            <h1>Daily Flipit Stats</h1>
+            <table>
+                <tr><td class="menuLabel">Played</td>        <td class="menuData" id="statsPlayed">0</td></tr>
+                <tr><td class="menuLabel">Solved</td>        <td class="menuData" id="statsSolved">0</td></tr>
+                <tr><td class="menuLabel">Win %</td>         <td class="menuData" id="statsWinPct">0%</td></tr>
+                <tr><td class="menuLabel">Current Streak</td><td class="menuData" id="statsStreak">0</td></tr>
+                <tr><td class="menuLabel">Max Streak</td>    <td class="menuData" id="statsMaxStreak">0</td></tr>
+            </table>
+        </div>
+    </a>
+    
     <!-- "Help icon" -->
-    <a id="helpParent" class="menuicon" style="right:40px;" onclick="showHelp()">
+    <a id="helpParent" class="menuicon" style="right:30px;" onclick="showHelp()">
         <i id="helpParent" class="fa fa-question-circle"></i>
         <div id="help" class="menuContent menuText" style="width:200px;">
             The objective is to get the puzzle to look like this:<br/>
@@ -145,6 +185,51 @@ const mTargetPattern = [1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1];
 const mTargetPuzzleNo = patternToNumber(mTargetPattern);
 
 const colorBackground = "white", colorForground = "black", colorClicked = "lightcyan";  //greenyellow
+
+var mTodayDateText = "", mTodayPuzzleDate = "1900-01-01"
+const cookieName = "eb-flipit-stats";
+var cookie = {
+    currentStreak: 0,
+    maxStreak: 0,
+    winPercentage: 0,
+    dailyGamesPlayed: 0,
+    dailyGamesWon: 0,
+    LastDate: "1900-01-01"
+};
+function dateDiff(utcdate1, utcdate2) {
+    // Don't need to deal with daylight savings day if dates are already in UTC.
+    const millisecondsPerDay = 1000 * 60 * 60 * 24;
+    const date1 = new Date(utcdate1);
+    const date2 = new Date(utcdate2);
+    const diffTime = Math.abs(date2 - date1);
+    const diffDays = Math.ceil(diffTime / millisecondsPerDay); 
+    return diffDays;
+}
+function getCookie() {
+    var c = window.localStorage.getItem(cookieName) || JSON.stringify(cookie);
+    return JSON.parse(c)
+}
+function updateCookie(e) {
+    var isStreak = false;
+
+
+    var c = getCookie();
+    e.isWin ? (e.isStreak ? c.currentStreak += 1 : c.currentStreak = 1) : (c.currentStreak = 0, c.guesses.fail += 1),
+    c.maxStreak = Math.max(c.currentStreak, c.maxStreak),
+    c.gamesPlayed += 1,
+    c.gamesWon += e.isWin ? 1 : 0,
+    c.winPercentage = Math.round(c.gamesWon / c.gamesPlayed * 100),
+    function (e, a) {
+        var s = y(a, 2),
+        t = s[0],
+        n = s[1];
+        return t !== Ua ? e += t * n : e
+    },
+    function (e) {
+        window.localStorage.setItem(cookieName, JSON.stringify(e))
+    }
+    (n)
+}
 
 var mBoxWidth = 0, mRadius = 0;
 
@@ -206,7 +291,7 @@ document.getElementById("undo").addEventListener("click", function(e) {
 document.getElementById("puzzleNo").addEventListener("change", function(e) {
     mStartPattern = numberToPattern(e.target.value);
     resetCircles(mStartPattern);
-    document.getElementById("utcdate").innerText = "";
+    document.getElementById("puzzledate").innerText = "";
 });
 
 
@@ -232,7 +317,7 @@ function btnTarget() {
     // Show the target pattern
     mStartPattern = mTargetPattern;
     resetCircles(mTargetPattern);
-    document.getElementById("utcdate").innerText = "";
+    document.getElementById("puzzledate").innerText = "";
 }
 
 
@@ -240,7 +325,7 @@ function btnRandom() {
     // Starting with the target solution, click 3 random circles to get a randum starting position
     mStartPattern = randomStart(mTargetPattern);
     resetCircles(mStartPattern);
-    document.getElementById("utcdate").innerText = "";
+    document.getElementById("puzzledate").innerText = "";
 }
 
 
@@ -248,7 +333,8 @@ function btnTodaysPuzzle() {
     // Uses today's date to generate a new starting puzzle
     mStartPattern = todaysStart(mTargetPattern);
     resetCircles(mStartPattern);
-    document.getElementById("utcdate").innerText = "Puzzle for " + utcDateText();
+    // mTodayDateText gets set by todaysStart()
+    document.getElementById("puzzledate").innerText = "Puzzle for " + mTodayDateText;
 }
 
 
@@ -291,6 +377,7 @@ function keyDown(e) {
 
 function showMenu() {showHiddenElement("topMenu");}
 function showHelp() {showHiddenElement("help")}
+function showStats() {showHiddenElement("stats")}
 function showHiddenElement(elementId, forceHide) {
 	// Set forceHide = true to not show element if it is already hidden
     if (typeof forceHide === 'undefined') {forceHide = false;}
@@ -308,6 +395,7 @@ function hideAllMenus(currentId) {
     // Close all menus except the one that was clicked
     if (currentId != "topMenu") showHiddenElement("topMenu", true);
     if (currentId != "help") showHiddenElement("help", true);
+    if (currentId != "stats") showHiddenElement("stats", true);
 }
 
 
@@ -491,9 +579,6 @@ function initCircles(pattern) {
     mInitialized = true;
 }
 function resetCircles(pattern) {
-    mMoves = 0;
-    mlblMoves.innerText = 0;
-
     var pIndex = 0;
     for (let y=0; y<4; y++) {
         for (let x=0; x<4; x++) {
@@ -511,6 +596,9 @@ function resetCircles(pattern) {
     mCircleArray.forEach(drawCircle);
     minpPuzzleNo.value = patternToNumber(pattern);
     mCurrentPattern = pattern.slice();
+
+    mMoves = 0;    // Must be after clickCircle
+    mlblMoves.innerText = 0;
 
     const btnUndo = document.getElementById("undo");
     btnUndo.disabled = "disabled";
@@ -693,28 +781,22 @@ function sfc32(a, b, c, d) {
     }
 }
 function getSeedFromDate() {
-    const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    const now = new Date();
-
-    const year = now.getUTCFullYear().toString();
-    const month = months[now.getUTCMonth()];
-    const day = (now.getUTCDate() + 9).toString();  // add 9 to guarantee a 2 digit result.
-    const weekday = weekdays[now.getUTCDay()];
-
-    return day + weekday + month + year;  // order selected with values changing the most at the beginning.
-}
-function utcDateText() {
+    //const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    //const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
     const weekdays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
     const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
     const now = new Date();
 
-    const weekday = weekdays[now.getUTCDay()];
-    const month = months[now.getUTCMonth()];
-    const day = now.getUTCDate().toString();
     const year = now.getUTCFullYear().toString();
+    const nMonth = now.getUTCMonth();
+    const month = months[nMonth];
+    const nDay = now.getUTCDate();
+    const day = (nDay + 9).toString();  // add 9 to guarantee a 2 digit result.
+    const weekday = weekdays[now.getUTCDay()];
 
-    return weekday + " " + month + " " + day + ", " + year
+    mTodayDateText = weekday + " " + month + " " + nDay.toString() + ", " + year;
+    mTodayPuzzleDate = year + "-" + nMonth.toString() + "-" + nDay.toString();
+    return day + weekday.substr(0,3) + month.substr(0,3) + year;  // order selected with values changing the most at the beginning.
 }
 </script> 
 
