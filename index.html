@@ -102,8 +102,27 @@
             display:none;
         }
         #puzzledate {
-            left:230px;
+            left:227px;
             font-size:16px;
+            font-weight:normal;
+        }
+    }
+    @media only screen and (min-width: 508px) { 
+        .brnodisplay {display:none;}
+    }
+    @media only screen and (max-width: 507px) {
+        #puzzledate {
+            left:10px;
+            top:77px;
+            font-weight:normal;
+        }
+        .lblPuzzleNo {
+            left:10px !important;
+            top:25px;
+        }
+        #puzzleNo{
+            left:20px !important;
+            top:25px;
         }
     }
 </style>
@@ -115,7 +134,8 @@
     <button id="reset" class="statusLine button">Reset</button>
     <button id="undo" class="statusLine button" disabled="disabled">Undo Last</button>
 
-    <label class="statusLine" for="puzzleNo" style="font-weight:bold; left:50px;">Puzzle #: </label>
+    <br class="brnodisplay"/>
+    <label class="statusLine lblPuzzleNo" for="puzzleNo" style="font-weight:bold; left:50px;">Puzzle #: </label>
     <input id="puzzleNo" class="statusLine" style="left:50px; width:80px;" title="Enter a number and hit {Enter} to select a specific puzzle"></input>
     <span class="statusLine" id="puzzledate"></span>
 
@@ -419,7 +439,7 @@ function drawCanvas(pattern, initialize) {
     //} else if (viewWidth < viewHeight) {
     //    viewHeight = viewWidth;
     }
-    if (viewWidth < mMinWidth) {viewWidth = mMinWidth;}
+    //if (viewWidth < mMinWidth) {viewWidth = mMinWidth;}
     mCanvas.height = viewWidth;
     mCanvas.width = viewWidth;
 
