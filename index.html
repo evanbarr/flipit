@@ -292,6 +292,7 @@ document.getElementById("puzzleNo").addEventListener("change", function(e) {
     mStartPattern = numberToPattern(e.target.value);
     resetCircles(mStartPattern);
     document.getElementById("puzzledate").innerText = "";
+    e.target.blur();
 });
 
 
