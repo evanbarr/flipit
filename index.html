@@ -10,7 +10,7 @@
     gtag('config', 'G-9HK482ET14');
     </script>
     <!-- Google AdSense  -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0549784498739741" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0549784498739741" crossorigin="anonymous" onerror="HasAdblocker()"></script>
     <!-- End Google -->
 
     <title>Flip.IT</title>
@@ -207,6 +207,29 @@
 </div>
 </div>
 
+<span class="SideAdbar">
+    <ins class="adsbygoogle"
+        style="display:block"
+        data-ad-client="ca-pub-0549784498739741"
+        data-ad-slot="7372507658"
+        data-ad-format="auto">
+    </ins>
+    <span id="isblocked" style="display:none;"></span>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+        function HasAdblocker() {
+            var e = document.getElementById('isblocked');
+            e.innerText='If you use an adBlocker, please consider whitelisting this site.  This is my only ad.';
+            e.style.display = "block";
+
+            //if (typeof ga !== 'undefined') {
+            //  // Log an event in Universal Analytics but without affecting overall bounce rate
+            //  ga('send', 'event', 'Adblock', 'Yes', {'nonInteraction': 1}); 
+            //} else {
+            //}
+        }
+    </script>
+</span>
 
 <script>
 "use strict";
