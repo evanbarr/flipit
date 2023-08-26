@@ -482,7 +482,11 @@ function drawCanvas(pattern, initialize) {
     //if (viewWidth < mMinWidth) {viewWidth = mMinWidth;}
     mCanvas.height = viewWidth;
     mCanvas.width = viewWidth;
-    document.getElementById("bottomAdbar").style.width = viewWidth + "px";
+    try {
+        document.getElementById("bottomAdbar").style.width = viewWidth + "px";
+    } catch(err) {
+        console.log(err.message);
+    }
 
     if (initialize === false) {
         mContext.clearRect(0, 0, viewWidth, viewWidth);
