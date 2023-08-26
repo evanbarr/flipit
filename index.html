@@ -214,6 +214,7 @@
     <canvas id="myCanvas">Your browser does not support the HTML5 canvas tag.</canvas>
 </div>
 
+<span id="isblocked" class="bottomAdbar" style="display:none;"></span>
 <span id="bottomAdbar" class="bottomAdbar">
     <!-- Google AdSense - adunit  -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0549784498739741" crossorigin="anonymous" onerror="HasAdblocker()"></script>
@@ -224,7 +225,6 @@
         data-ad-slot="7372507658"
         >
     </ins>
-    <span id="isblocked" style="display:none;"></span>
 </span>
 </div>
 
@@ -920,6 +920,8 @@ function HasAdblocker() {
     var e = document.getElementById('isblocked');
     e.innerText='If you use an adBlocker, please consider whitelisting this site.  This is my only ad.';
     e.style.display = "block";
+
+    document.getElementById('bottomAdbar').style.display = "none";
 
     //if (typeof ga !== 'undefined') {
     //  // Log an event in Universal Analytics but without affecting overall bounce rate
