@@ -10,7 +10,7 @@
     gtag('config', 'G-9HK482ET14');
     </script>
     <!-- Google AdSense  -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0549784498739741" crossorigin="anonymous" onerror="HasAdblocker()"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0549784498739741" crossorigin="anonymous"></script>
     <!-- End Google -->
 
     <title>Flip.IT</title>
@@ -215,33 +215,21 @@
 </div>
 
 <span class="bottomAdbar">
+    <!-- Google AdSense - adunit  -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0549784498739741" crossorigin="anonymous" onerror="HasAdblocker()"></script>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     <ins class="adsbygoogle"
         style="display:block"
         data-ad-client="ca-pub-0549784498739741"
         data-ad-slot="7372507658"
-        data-ad-format="auto">
+        data-ad-format="rectangle, horizontal">
     </ins>
     <span id="isblocked" style="display:none;"></span>
-    <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-        function HasAdblocker() {
-            var e = document.getElementById('isblocked');
-            e.innerText='If you use an adBlocker, please consider whitelisting this site.  This is my only ad.';
-            e.style.display = "block";
-
-            //if (typeof ga !== 'undefined') {
-            //  // Log an event in Universal Analytics but without affecting overall bounce rate
-            //  ga('send', 'event', 'Adblock', 'Yes', {'nonInteraction': 1}); 
-            //} else {
-            //}
-        }
-    </script>
 </span>
 </div>
 
 <script>
 "use strict";
-// TODO: Analytics, Ads
 
 // Globals
 const mBorderLeft = 10, mBorderRight=10, mBorderTop = 80, mBorderBottom = 110;  // left and top must match the actual position for canvas element from html above.
@@ -494,6 +482,7 @@ function drawCanvas(pattern, initialize) {
     //if (viewWidth < mMinWidth) {viewWidth = mMinWidth;}
     mCanvas.height = viewWidth;
     mCanvas.width = viewWidth;
+    document.getElementById("bottomAdbar").style.width = viewWidth + "px";
 
     if (initialize === false) {
         mContext.clearRect(0, 0, viewWidth, viewWidth);
@@ -917,6 +906,22 @@ function loadPersist() {
  */
 function updatePersisted(e) {
     window.localStorage.setItem(persistName, JSON.stringify(persist));
+}
+
+
+// ------------------------
+// Ads
+//
+function HasAdblocker() {
+    var e = document.getElementById('isblocked');
+    e.innerText='If you use an adBlocker, please consider whitelisting this site.  This is my only ad.';
+    e.style.display = "block";
+
+    //if (typeof ga !== 'undefined') {
+    //  // Log an event in Universal Analytics but without affecting overall bounce rate
+    //  ga('send', 'event', 'Adblock', 'Yes', {'nonInteraction': 1}); 
+    //} else {
+    //}
 }
 </script> 
 
