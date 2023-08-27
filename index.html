@@ -107,6 +107,11 @@
     .menuText {
         color:white;
     }
+    #help {width:250px;}
+    .targetImage {
+        width:190px;
+        padding-left:20px;
+    }
     #puzzledate {
         position:absolute;
         left:332px;
@@ -135,7 +140,10 @@
             font-weight:normal;
         }
         .menuItem {height:25px;}
-        #help {width:300px !important;}
+        #help {width:300px;}
+        .targetImage {
+            padding-left:45px;
+        }
     }
     @media only screen and (min-width: 508px) { 
         .brnodisplay {display:none;}
@@ -173,7 +181,7 @@
     <a id="statsParent" class="menuicon" style="right:60px;" onclick="showStats()">
         <i id="statsParent" class="fa fa-line-chart"></i>
         <div id="stats" class="menuContent menuText" style="width:300px;">
-            <h1>Daily Flipit Stats</h1>
+            <h1>Daily FlipIT Stats</h1>
             <table>
                 <tr><td class="menuLabel">Played</td>        <td class="menuData" id="statsPlayed">0</td></tr>
                 <tr><td class="menuLabel">Solved</td>        <td class="menuData" id="statsSolved">0</td></tr>
@@ -187,9 +195,9 @@
     <!-- "Help icon" -->
     <a id="helpParent" class="menuicon" style="right:30px;" onclick="showHelp()">
         <i id="helpParent" class="fa fa-question-circle"></i>
-        <div id="help" class="menuContent menuText" style="width:200px;">
+        <div id="help" class="menuContent menuText">
             The objective is to get the puzzle to look like this:<br/>
-            <canvas id="objective">Your browser does not support the HTML5 canvas tag.</canvas>
+            <canvas id="objective" class="targetImage">Your browser does not support the HTML5 canvas tag.</canvas>
             <br/>
             Click on a circle to flip its color and the color of all adjacent circles.
             This includes circles at the diagonals.<br/>
@@ -242,6 +250,7 @@
 
 // Globals
 const mBorderLeft = 10, mBorderRight=10, mBorderTop = 80, mBorderBottom = 110;  // left and top must match the actual position for canvas element from html above.
+const helpMenuWidth = 190;  // The width available to the "target" image displayed in the help menu.
 const mMinWidth = 574;  // Canvas minimum width to prevent toolbar from getting messy.
 const testPattern = [1,0,0,0,0,0,1,0,1,0,1,1,1,1,0,1];
 const mTargetPattern = [1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1];
@@ -283,7 +292,7 @@ mCanvas.left = mBorderLeft;
 mCanvas.top = mBorderTop;
 
 
-drawObjective(document.getElementById("objective"), mTargetPattern, 190)
+drawObjective(document.getElementById("objective"), mTargetPattern, helpMenuWidth)
 //loadPersist();
 
 var mStartPattern = testPattern;
@@ -932,11 +941,12 @@ function HasAdblocker() {
 
     document.getElementById('bottomAdbar').style.display = "none";
 
-    //if (typeof ga !== 'undefined') {
+    if (typeof gtag !== 'undefined') {
+        gtag("event", "HasAdBlocker", "Yes")
     //  // Log an event in Universal Analytics but without affecting overall bounce rate
     //  ga('send', 'event', 'Adblock', 'Yes', {'nonInteraction': 1}); 
     //} else {
-    //}
+    }
 }
 </script> 
 
