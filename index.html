@@ -16,59 +16,59 @@
     </script>
     <!-- Google AdSense  -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0549784498739741" crossorigin="anonymous"></script>
-    <script>
-        //preventAdSenseHeightChange("topDiv");
-        preventAdSenseHeightChange("bottomAdbar");
-	    
-        function preventAdSenseHeightChange(elementId) {
-            //const e = document.getElementById(elementId);
-        
-            waitForElement(elementId).then((e) => {
-                const observer = new MutationObserver(function (mutations) {
-                    mutations.forEach(function(mutation) {
-                        if (typeof mutation.OldValue === 'undefined') {
-                            e.style = "";
-                        } else {
-                            e.style = mutation.OldValue;
-                        }
-                    })
-                });
-                const config = {
-                    attributes: true,
-                    attributeFilter: ['style'],
-                    attributeOldValue: true
-                }
-                observer.observe(e, config);
-            }); //waitForElement
-        }
-
-
-        function waitForElement(elementId) {
-            return new Promise(resolve => {
-                if (document.getElementById(elementId)) {
-                    return resolve(document.getElementById(elementId));
-                }
-
-                const observer = new MutationObserver(mutations => {
-                    if (document.getElementById(elementId)) {
-                        observer.disconnect();
-                        resolve(document.getElementById(elementId));
-                    }
-                });
-
-                observer.observe(document.body, {
-                    childList: true,
-                    subtree: true
-                });
-            });
-        }
-    </script>
     <!-- End Google -->
 
     <title>Flip.IT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body onresize="resize()">
+<script>
+//preventAdSenseHeightChange("topDiv");
+preventAdSenseHeightChange("bottomAdbar");
+    
+function preventAdSenseHeightChange(elementId) {
+    //const e = document.getElementById(elementId);
+
+    waitForElement(elementId).then((e) => {
+	const observer = new MutationObserver(function (mutations) {
+	    mutations.forEach(function(mutation) {
+		if (typeof mutation.OldValue === 'undefined') {
+		    e.style = "";
+		} else {
+		    e.style = mutation.OldValue;
+		}
+	    })
+	});
+	const config = {
+	    attributes: true,
+	    attributeFilter: ['style'],
+	    attributeOldValue: true
+	}
+	observer.observe(e, config);
+    }); //waitForElement
+}
+
+
+function waitForElement(elementId) {
+    return new Promise(resolve => {
+	if (document.getElementById(elementId)) {
+	    return resolve(document.getElementById(elementId));
+	}
+
+	const observer = new MutationObserver(mutations => {
+	    if (document.getElementById(elementId)) {
+		observer.disconnect();
+		resolve(document.getElementById(elementId));
+	    }
+	});
+
+	observer.observe(document.body, {
+	    childList: true,
+	    subtree: true
+	});
+    });
+}
+</script>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MH9TLBLK" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
