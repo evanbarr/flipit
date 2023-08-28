@@ -334,7 +334,7 @@ mCanvas.addEventListener("mousedown", function(e) {
             }
             if (persist.currentStreak > persist.maxStreak) {persist.maxStreak = persist.currentStreak;}
 
-            const winPct = ((100 * (persist.dailyGamesWon / persist.dailyGamesPlayed)) || 0).toString() + "%";
+            const winPct = Math.round((100 * (persist.dailyGamesWon / persist.dailyGamesPlayed)) || 0).toString() + "%";
             document.getElementById("statsPlayed").innerText = persist.dailyGamesPlayed;
             document.getElementById("statsSolved").innerText = persist.dailyGamesWon;
             document.getElementById("statsWinPct").innerText = winPct;
