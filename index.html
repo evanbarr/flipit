@@ -22,53 +22,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body onresize="resize()">
-<script>
-//preventAdSenseHeightChange("topDiv");
-preventAdSenseHeightChange("bottomAdbar");
-    
-function preventAdSenseHeightChange(elementId) {
-    //const e = document.getElementById(elementId);
-
-    waitForElement(elementId).then((e) => {
-	const observer = new MutationObserver(function (mutations) {
-	    mutations.forEach(function(mutation) {
-		if (typeof mutation.OldValue === 'undefined') {
-		    e.style = "";
-		} else {
-		    e.style = mutation.OldValue;
-		}
-	    })
-	});
-	const config = {
-	    attributes: true,
-	    attributeFilter: ['style'],
-	    attributeOldValue: true
-	}
-	observer.observe(e, config);
-    }); //waitForElement
-}
-
-
-function waitForElement(elementId) {
-    return new Promise(resolve => {
-	if (document.getElementById(elementId)) {
-	    return resolve(document.getElementById(elementId));
-	}
-
-	const observer = new MutationObserver(mutations => {
-	    if (document.getElementById(elementId)) {
-		observer.disconnect();
-		resolve(document.getElementById(elementId));
-	    }
-	});
-
-	observer.observe(document.body, {
-	    childList: true,
-	    subtree: true
-	});
-    });
-}
-</script>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MH9TLBLK" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
@@ -213,6 +166,54 @@ function waitForElement(elementId) {
     }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<script>
+//preventAdSenseHeightChange("topDiv");
+preventAdSenseHeightChange("bottomAdbar");
+    
+function preventAdSenseHeightChange(elementId) {
+    //const e = document.getElementById(elementId);
+
+    waitForElement(elementId).then((e) => {
+	const observer = new MutationObserver(function (mutations) {
+	    mutations.forEach(function(mutation) {
+		if (typeof mutation.OldValue === 'undefined') {
+		    e.style = "";
+		} else {
+		    e.style = mutation.OldValue;
+		}
+	    })
+	});
+	const config = {
+	    attributes: true,
+	    attributeFilter: ['style'],
+	    attributeOldValue: true
+	}
+	observer.observe(e, config);
+    }); //waitForElement
+}
+
+
+function waitForElement(elementId) {
+    return new Promise(resolve => {
+	if (document.getElementById(elementId)) {
+	    return resolve(document.getElementById(elementId));
+	}
+
+	const observer = new MutationObserver(mutations => {
+	    if (document.getElementById(elementId)) {
+		observer.disconnect();
+		resolve(document.getElementById(elementId));
+	    }
+	});
+
+	observer.observe(document.body, {
+	    childList: true,
+	    subtree: true
+	});
+    });
+}
+</script>
 
 <div id="topDiv" style="width:100%">
 <div style="position:absolute; top:0px; left:0px;">
