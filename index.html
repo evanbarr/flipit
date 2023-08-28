@@ -918,7 +918,7 @@ function loadPersist() {
     }
     //localStorage.clear();
 
-    const winPct = ((100 * (persist.dailyGamesWon / persist.dailyGamesPlayed)) || 0).toString() + "%";
+    const winPct = Math.round((100 * (persist.dailyGamesWon / persist.dailyGamesPlayed)) || 0).toString() + "%";
     document.getElementById("statsPlayed").innerText = persist.dailyGamesPlayed;
     document.getElementById("statsSolved").innerText = persist.dailyGamesWon;
     document.getElementById("statsWinPct").innerText = winPct;
@@ -927,14 +927,6 @@ function loadPersist() {
 }
 
 
-/* var persist = {
-    currentStreak: 0,
-    maxStreak: 0,
-    dailyGamesPlayed: 0,
-    dailyGamesWon: 0,
-    LastWinDate: "1900-01-01",
-    LastPlayDate: "1900-01-01"
- */
 function updatePersisted(e) {
     window.localStorage.setItem(persistName, JSON.stringify(persist));
 }
