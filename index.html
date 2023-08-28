@@ -3,9 +3,9 @@
 <head>
 	<!-- Google Tag Manager -->
 	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
-	var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
-	j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-	})(window,document,'script','dataLayer','GTM-MH9TLBLK');</script>
+        var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+        j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-MH9TLBLK');</script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-9HK482ET14"></script>
     <script>
@@ -16,6 +16,10 @@
     </script>
     <!-- Google AdSense  -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0549784498739741" crossorigin="anonymous"></script>
+    <script>
+        //preventAdSenseHeightChange("topDiv");
+        preventAdSenseHeightChange("bottomAdbar");
+    </script>
     <!-- End Google -->
 
     <title>Flip.IT</title>
@@ -25,7 +29,7 @@
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MH9TLBLK" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-	
+
 <style>
     body {
         margin-top:0px;
@@ -110,7 +114,8 @@
     #help {width:250px;}
     .targetImage {
         width:190px;
-        padding-left:20px;
+        height:190px;
+        margin-left:20px;  /*  (help,width - 190 - 20) / 2    */
     }
     #puzzledate {
         position:absolute;
@@ -142,7 +147,7 @@
         .menuItem {height:25px;}
         #help {width:300px;}
         .targetImage {
-            padding-left:45px;
+            padding-left:45px;  /*  (help,width - 190 - 20) / 2    */
         }
     }
     @media only screen and (min-width: 508px) { 
@@ -166,7 +171,7 @@
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-<div style="width:100%">
+<div id="topDiv" style="width:100%">
 <div style="position:absolute; top:0px; left:0px;">
     <label class="statusLine" style="font-weight:bold; left:10px;">Moves: </label><label id="moves" class="statusLine" style="left:10px;"></label>
     <button id="reset" class="statusLine button">Reset</button>
@@ -196,6 +201,8 @@
     <a id="helpParent" class="menuicon" style="right:30px;" onclick="showHelp()">
         <i id="helpParent" class="fa fa-question-circle"></i>
         <div id="help" class="menuContent menuText">
+            <h1>FlipIt</h1>
+            <p style="color:darkred;text-align:center;margin-top:0;">Solve in 3 moves</p>
             The objective is to get the puzzle to look like this:<br/>
             <canvas id="objective" class="targetImage">Your browser does not support the HTML5 canvas tag.</canvas>
             <br/>
@@ -227,7 +234,7 @@
     </a>
     
     <br/>
-    <canvas id="myCanvas">Your browser does not support the HTML5 canvas tag.</canvas>
+    <canvas id="myCanvas">Your browser does not support the HTML5 canvas tag.</canvas>     
 </div>
 
 <span id="isblocked" class="bottomAdbar" style="display:none;"></span>
@@ -238,14 +245,16 @@
     <ins class="adsbygoogle"
         style="display:block; height:100px; width:inherit;"
         data-ad-client="ca-pub-0549784498739741"
-        data-ad-slot="1135045398"
-        data-ad-format="auto"
-        data-full-width-responsive="true">
+        data-ad-slot="7372507658"
+        data-ad-format="rectangle, horizontal">
     </ins>
 </span>
 </div>
+    
 
 <script>
+// Info about original magic square puzzle (1978)
+// https://clickamericana.com/toys-and-games/vintage-merlin-electronic-wizard-game-toy-console
 "use strict";
 
 // Globals
@@ -938,15 +947,59 @@ function HasAdblocker() {
     var e = document.getElementById('isblocked');
     e.innerText='If you use an adBlocker, please consider whitelisting this site.  This is my only ad.';
     e.style.display = "block";
-
+    
     document.getElementById('bottomAdbar').style.display = "none";
 
-    //if (typeof gtag !== 'undefined') {
-    //    gtag("event", "HasAdBlocker", "Yes")
+    if (typeof gtag !== 'undefined') {
+        gtag("event", "HasAdBlocker", "Yes")
     //  // Log an event in Universal Analytics but without affecting overall bounce rate
     //  ga('send', 'event', 'Adblock', 'Yes', {'nonInteraction': 1}); 
     //} else {
-    //}
+    }
+}
+
+
+function preventAdSenseHeightChange(elementId) {
+    //const e = document.getElementById(elementId);
+  
+    waitForElement(elementId).then((e) => {
+        const observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function(mutation) {
+                if (typeof mutation.OldValue === 'undefined') {
+                    e.style = "";
+                } else {
+                    e.style = mutation.OldValue;
+                }
+            })
+        });
+        const config = {
+            attributes: true,
+            attributeFilter: ['style'],
+            attributeOldValue: true
+        }
+        observer.observe(e, config);
+    }); //waitForElement
+}
+
+
+function waitForElement(elementId) {
+    return new Promise(resolve => {
+        if (document.getElementById(elementId)) {
+            return resolve(document.getElementById(elementId));
+        }
+
+        const observer = new MutationObserver(mutations => {
+            if (document.getElementById(elementId)) {
+                observer.disconnect();
+                resolve(document.getElementById(elementId));
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
 }
 </script> 
 
