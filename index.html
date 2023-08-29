@@ -82,6 +82,8 @@
         width:150px;
         right:0;
         padding:5px;
+        overflow-y:auto;
+        max-height:90vh;
         z-index:100;
         background:gray;
     }
@@ -522,7 +524,13 @@ function drawCanvas(pattern, initialize) {
     mCanvas.height = viewWidth;
     mCanvas.width = viewWidth;
     try {
-        document.getElementById("bottomAdbar").style.width = viewWidth + "px";
+        let adbar = document.getElementById("bottomAdbar");
+        adbar.style.width = viewWidth + "px";
+        adbar.style.top = mCanvas.top + viewWidth + 17 + "px";
+
+        adbar = document.getElementById("isblocked");
+        adbar.style.width = viewWidth + "px";
+        adbar.style.top = mCanvas.top + viewWidth + 17 + "px";
     } catch(err) {
         console.log(err.message);
     }
