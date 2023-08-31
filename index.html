@@ -31,7 +31,7 @@
     body {
         margin-top:0px;
         margin-left:0px;
-        overflow:hidden;
+        /* overflow:hidden; */
     }
     label {
         user-select:none;
@@ -190,6 +190,10 @@
             left:18px !important;
             top:25px;
         }
+    }
+    @media only screen and (max-width: 400px), only screen and (max-height: 572px) {
+        #help {width:unset;}
+        #stats {width:unset !important;}
     }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
