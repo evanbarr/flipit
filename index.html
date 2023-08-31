@@ -61,6 +61,7 @@
         left:20px;
         font-size:18px;
     }
+    .brnodisplay {display:none;}
     .button {
         width:100px;
     }
@@ -83,7 +84,7 @@
         right:0;
         padding:5px;
         overflow-y:auto;
-        max-height:90vh;
+        max-height:98vh;
         z-index:100;
         background:gray;
     }
@@ -136,7 +137,7 @@
         height:100px;
         padding-top:10px;
     }
-    @media only screen and (max-width: 768px) {
+    @media only screen and (max-width: 768px), only screen and (max-height: 790px) {
         /* For mobile phones: */
         #undo {
             display:none;
@@ -151,18 +152,16 @@
         }
         .menuItem {height:25px;}
         #help {
-	    width:330px;
-	    padding-left:10px;
-	    padding-right:10px
-	}
+            width:330px;
+            padding-left:10px;
+            padding-right:10px
+        }
         .targetImage {
             padding-left:45px;  /*  (help,width - 190 - 20) / 2    */
         }
     }
-    @media only screen and (min-width: 508px) { 
-        .brnodisplay {display:none;}
-    }
-    @media only screen and (max-width: 507px) {
+    @media only screen and (max-width: 507px), only screen and (max-height: 682px) {
+        .brnodisplay {display:block;}
         #puzzledate {
             left:10px;
             top:79px;
@@ -277,7 +276,7 @@ preventAdSenseHeightChange("bottomAdbar");
 // Globals
 const mBorderLeft = 10, mBorderRight=10, mBorderTop = 80, mBorderBottom = 110;  // left and top must match the actual position for canvas element from html above.
 const helpMenuWidth = 190;  // The width available to the "target" image displayed in the help menu.
-const mMinWidth = 574;  // Canvas minimum width to prevent toolbar from getting messy.
+const mMinWidth = 287;  // Canvas minimum width to prevent toolbar from getting messy.
 const testPattern = [1,0,0,0,0,0,1,0,1,0,1,1,1,1,0,1];
 const mTargetPattern = [1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1];
 const mTargetPuzzleNo = patternToNumber(mTargetPattern);
@@ -523,7 +522,7 @@ function drawCanvas(pattern, initialize) {
     //} else if (viewWidth < viewHeight) {
     //    viewHeight = viewWidth;
     }
-    //if (viewWidth < mMinWidth) {viewWidth = mMinWidth;}
+    if (viewWidth < mMinWidth) {viewWidth = mMinWidth;}
     mCanvas.height = viewWidth;
     mCanvas.width = viewWidth;
     try {
@@ -973,46 +972,47 @@ function HasAdblocker() {
     }
 }
 
+
 function preventAdSenseHeightChange(elementId) {
     //const e = document.getElementById(elementId);
 
     waitForElement(elementId).then((e) => {
-	const observer = new MutationObserver(function (mutations) {
-	    mutations.forEach(function(mutation) {
-		if (typeof mutation.OldValue === 'undefined') {
-		    e.style.height = "";
-		} else {
-		    e.style.height = mutation.OldValue;
-		}
-	    })
-	});
-	const config = {
-	    attributes: true,
-	    attributeFilter: ['style'],
-	    attributeOldValue: true
-	}
-	observer.observe(e, config);
+        const observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function(mutation) {
+                if (typeof mutation.OldValue === 'undefined') {
+                    e.style.height = "";
+                } else {
+                    e.style.height = mutation.OldValue;
+                }
+            })
+        });
+        const config = {
+            attributes: true,
+            attributeFilter: ['style'],
+            attributeOldValue: true
+        }
+        observer.observe(e, config);
     }); //waitForElement
 }
 
 
 function waitForElement(elementId) {
     return new Promise(resolve => {
-	if (document.getElementById(elementId)) {
-	    return resolve(document.getElementById(elementId));
-	}
+        if (document.getElementById(elementId)) {
+            return resolve(document.getElementById(elementId));
+        }
 
-	const observer = new MutationObserver(mutations => {
-	    if (document.getElementById(elementId)) {
-		observer.disconnect();
-		resolve(document.getElementById(elementId));
-	    }
-	});
+        const observer = new MutationObserver(mutations => {
+            if (document.getElementById(elementId)) {
+                observer.disconnect();
+                resolve(document.getElementById(elementId));
+            }
+        });
 
-	observer.observe(document.body, {
-	    childList: true,
-	    subtree: true
-	});
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
     });
 }
 </script> 
