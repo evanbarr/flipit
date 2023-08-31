@@ -137,6 +137,21 @@
         height:100px;
         padding-top:10px;
     }
+    .noLandscape {
+        display:none;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding-top:100px;
+        background-color:white;
+        text-align: center;
+        z-index:2147483647;
+    }
+    @media only screen and (max-height: 360px) and (orientation:landscape) {
+        .noLandscape {display:block;}
+    }
     @media only screen and (max-width: 768px), only screen and (max-height: 790px) {
         /* For mobile phones: */
         #undo {
@@ -180,6 +195,11 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <div id="topDiv" style="width:100%">
+<div class="noLandscape">
+    <p>To enable this app to fit your screen<br/>
+        <b>please rotate your device.</b>
+    </p>
+</div>
 <div style="position:absolute; top:0px; left:0px;">
     <label class="statusLine" style="font-weight:bold; left:10px;">Moves: </label><label id="moves" class="statusLine" style="left:10px;"></label>
     <button id="reset" class="statusLine button">Reset</button>
@@ -261,7 +281,7 @@
         data-ad-format="rectangle, horizontal">
     </ins>
 </span>
-</div>
+</div><!-- topDiv -->
     
 
 <script>
