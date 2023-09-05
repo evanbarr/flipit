@@ -115,6 +115,14 @@
         padding-left:20px;
         padding-right:20px
     }
+    .solveMsg{
+        padding-top:28px !important;
+    }
+    #notSolved {
+        display:none;
+        color:darkblue;
+        font-weight:bold;
+    }
     .targetImage {
         width:190px;
         height:190px;
@@ -212,7 +220,6 @@
     <br class="brnodisplay"/>
     <label class="statusLine lblPuzzleNo" for="puzzleNo" style="font-weight:bold; left:50px;">Puzzle #: </label>
     <input id="puzzleNo" class="statusLine" style="left:50px; width:80px;" title="Enter a number and hit {Enter} to select a specific puzzle"></input>
-    <label id="test" style="display:none;"></label>
     <span class="statusLine" id="puzzledate"></span>
 
     <!-- "Stats icon" -->
@@ -226,6 +233,7 @@
                 <tr><td class="menuLabel">Win %</td>         <td class="menuData" id="statsWinPct">0%</td></tr>
                 <tr><td class="menuLabel">Current Streak</td><td class="menuData" id="statsStreak">0</td></tr>
                 <tr><td class="menuLabel">Max Streak</td>    <td class="menuData" id="statsMaxStreak">0</td></tr>
+                <tr><td class="menuData solveMsg" colspan="2">You have <span id="notSolved">not </span>solved today's puzzle!</td></tr>
             </table>
         </div>
     </a>
@@ -384,6 +392,8 @@ mCanvas.addEventListener("mousedown", function(e) {
             document.getElementById("statsWinPct").innerText = winPct;
             document.getElementById("statsStreak").innerText = persist.currentStreak;
             document.getElementById("statsMaxStreak").innerText = persist.maxStreak;
+            
+            document.getElementById("notSolved").style.display = "none";
 
             updatePersisted();
         }
@@ -464,7 +474,6 @@ function btnTodaysPuzzle(init) {
     loadPersist();
     const daysSinceLastPlay = dateDiff(mTodayPuzzleDate, persist.LastPlayDate);
     const daysSinceLastWin = dateDiff(mTodayPuzzleDate, persist.LastWinDate);
-    document.getElementById("test").innerText = daysSinceLastPlay + ", " + daysSinceLastWin;
     if (daysSinceLastPlay > 0) {
         persist.dailyGamesPlayed++;
         persist.LastPlayDate = mTodayPuzzleDate;
@@ -472,10 +481,14 @@ function btnTodaysPuzzle(init) {
         // If it's been more than a day since playing or winning, reset streak
         if (daysSinceLastWin > 1) {
             persist.currentStreak = 0;
-            document.getElementById("statsStreak").innerText = persist.currentStreak;
+            document.getElementById("statsStreak").innerText = 0;
         }
 
+        document.getElementById("notSolved").style.display = "inline";
+
         updatePersisted();
+    } else if (daysSinceLastWin == 0) {
+        document.getElementById("notSolved").style.display = "none";
     }
 }
 
