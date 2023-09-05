@@ -212,6 +212,7 @@
     <br class="brnodisplay"/>
     <label class="statusLine lblPuzzleNo" for="puzzleNo" style="font-weight:bold; left:50px;">Puzzle #: </label>
     <input id="puzzleNo" class="statusLine" style="left:50px; width:80px;" title="Enter a number and hit {Enter} to select a specific puzzle"></input>
+    <label id="test" style="display:none;"></label>
     <span class="statusLine" id="puzzledate"></span>
 
     <!-- "Stats icon" -->
@@ -463,6 +464,7 @@ function btnTodaysPuzzle(init) {
     loadPersist();
     const daysSinceLastPlay = dateDiff(mTodayPuzzleDate, persist.LastPlayDate);
     const daysSinceLastWin = dateDiff(mTodayPuzzleDate, persist.LastWinDate);
+    document.getElementById("test").innerText = daysSinceLastPlay + ", " + daysSinceLastWin;
     if (daysSinceLastPlay > 0) {
         persist.dailyGamesPlayed++;
         persist.LastPlayDate = mTodayPuzzleDate;
