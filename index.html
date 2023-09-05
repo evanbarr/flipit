@@ -342,7 +342,7 @@ mCanvas.top = mBorderTop;
 
 
 drawObjective(document.getElementById("objective"), mTargetPattern, helpMenuWidth)
-//loadPersist();
+//loadPersist();   // Now done in btnTodaysPuzzle()
 
 var mStartPattern = testPattern;
 //drawCanvas(mStartPattern);   // Replaced with below
@@ -359,19 +359,22 @@ mCanvas.addEventListener("mousedown", function(e) {
     hideAllMenus();
     //addMove();
     flipCircles(Math.floor(x/mBoxWidth), Math.floor(y/mBoxWidth), true);
+
+    // If solved
     if (mTargetPuzzleNo == patternToNumber(mCurrentPattern)) { 
         blinkCircles();
 
+        // Only update stats if we didn't already solve today's puzzle
         const daysSinceLastWin = isDaily ? dateDiff(persist.LastWinDate, mTodayPuzzleDate): 0;
         if (daysSinceLastWin > 0) {
             persist.dailyGamesWon++;
             persist.LastWinDate = mTodayPuzzleDate;
 
-            if (daysSinceLastWin == 1) {
+            // if (daysSinceLastWin == 1) {  // Now handled by btnTodaysPuzzle() which loads the stats
                 persist.currentStreak++;
-            } else {
-                persist.currentStreak = 1;
-            }
+            // } else {
+            //     persist.currentStreak = 1;
+            // }
             if (persist.currentStreak > persist.maxStreak) {persist.maxStreak = persist.currentStreak;}
 
             const winPct = Math.round((100 * (persist.dailyGamesWon / persist.dailyGamesPlayed)) || 0).toString() + "%";
@@ -458,9 +461,17 @@ function btnTodaysPuzzle(init) {
 
     // If not already played today, update dailyGamesPlayed stat
     loadPersist();
-    if (dateDiff(mTodayPuzzleDate, persist.LastPlayDate) > 0) {
+    const daysSinceLastPlay = dateDiff(mTodayPuzzleDate, persist.LastPlayDate);
+    const daysSinceLastWin = dateDiff(mTodayPuzzleDate, persist.LastWinDate);
+    if (daysSinceLastPlay > 0) {
         persist.dailyGamesPlayed++;
         persist.LastPlayDate = mTodayPuzzleDate;
+
+        // If it's been more than a day since playing or winning, reset streak
+        if (daysSinceLastWin > 1) {
+            persist.currentStreak = 0;
+        }
+
         updatePersisted();
     }
 }
@@ -957,6 +968,10 @@ function dateDiff(utcdate1, utcdate2) {
 
 
 function loadPersist() {
+    // Since the persisted data only refers to stats for the daily puzzle,
+    // this function is called when the daily puzzle is loaded.  Further processing
+    // is done by the loader since it has more information.
+
     //var data = window.localStorage.getItem(persistName) || JSON.stringify(persist);
     var data = window.localStorage.getItem(persistName);
     if (data) {
