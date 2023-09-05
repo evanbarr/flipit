@@ -470,6 +470,7 @@ function btnTodaysPuzzle(init) {
         // If it's been more than a day since playing or winning, reset streak
         if (daysSinceLastWin > 1) {
             persist.currentStreak = 0;
+            document.getElementById("statsStreak").innerText = persist.currentStreak;
         }
 
         updatePersisted();
