@@ -170,6 +170,7 @@
         user-select:none; 
     }
     #isSolved {
+        display:none;
         vertical-align:middle;
         font-weight:bold;
         font-size:18px;
@@ -439,6 +440,7 @@ mCanvas.addEventListener("mousedown", function(e) {
             document.getElementById("statsMaxStreak").innerText = persist.maxStreak;
             
             document.getElementById("notSolved").style.display = "none";
+            document.getElementById("isSolved").style.display = "inline";
 
             updatePersisted();
         }
@@ -530,10 +532,12 @@ function btnTodaysPuzzle(init) {
         }
 
         document.getElementById("notSolved").style.display = "inline";
+	document.getElementById("isSolved").style.display = "none";
 
         updatePersisted();
     } else if (daysSinceLastWin == 0) {
         document.getElementById("notSolved").style.display = "none";
+        document.getElementById("isSolved").style.display = "inline";
     }
 }
 
@@ -813,6 +817,7 @@ function resetCircles(pattern) {
     mMoves = 0;    // Must be after clickCircle()
     mlblMoves.innerText = 0;
     document.getElementById("puzzledate").innerText = "";
+    document.getElementById("isSolved").style.display = "none";
     isDaily = false;
 
     const btnUndo = document.getElementById("undo");
