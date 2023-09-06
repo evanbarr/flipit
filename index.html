@@ -144,7 +144,7 @@
         padding-top:28px !important;
     }
     #notSolved {
-        display:none;
+        display:inline;
         color:darkblue;
         font-weight:bold;
     }
@@ -818,7 +818,6 @@ function resetCircles(pattern) {
     mlblMoves.innerText = 0;
     document.getElementById("puzzledate").innerText = "";
     document.getElementById("isSolved").style.display = "none";
-    document.getElementById("notSolved").style.display = "inline";
     isDaily = false;
 
     const btnUndo = document.getElementById("undo");
