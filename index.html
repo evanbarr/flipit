@@ -35,6 +35,7 @@
     }
     label {
         user-select:none;
+        font-weight:bold;
     }
     #myCanvas {
         border:0px solid; 
@@ -51,10 +52,34 @@
         width:18px;
         height:18px;
     }
-    [title]:hover::after {
-        content: attr(title);
-        background-color:green;
+
+    [role=tooltip] {
+        display:none;
+        position:absolute;
+        top:3.1em;
+        left:4em;
+        min-width:177px;
+        background-color:lemonchiffon;
+        color:black;
+        font-size:14px;
+        font-weight:normal;
+        text-align:center;
+        vertical-align:middle;
+        padding:0.2em .6em;
+        border-radius:5px;
+        border:1px solid black;
+        z-index:9999;
     }
+    .tip-trigger:hover + [role=tooltip],
+    .tip-trigger:focus + [role=tooltip] {
+        display:inline;
+    }
+    .tip-wrapper {position:relative;}
+    #tip-puzzlesolved {
+        top:1.3em;
+        left:5em;
+    }
+
     .statusLine {
         position:relative;
         top:20px;
@@ -128,14 +153,27 @@
         height:190px;
         margin-left:20px;  /*  (help,width - 190 - 20) / 2    */
     }
-    #puzzledate {
+    .lblPuzzleNo {
+        left:50px;
+    }
+    #puzzleNo{
+        left:50px;
+        width:80px;
+    }
+    .puzzledate {
         position:absolute;
         left:332px;
         top:47px;
         font-weight:bold;
         font-size:12px;
-        overflow:hidden;
+        /* overflow:hidden; */
         user-select:none; 
+    }
+    #isSolved {
+        vertical-align:middle;
+        font-weight:bold;
+        font-size:18px;
+        color:darkred;
     }
     .bottomAdbar {
         position:absolute;
@@ -165,7 +203,7 @@
         #undo {
             display:none;
         }
-        #puzzledate {
+        .puzzledate {
             left:227px;
             font-size:16px;
             font-weight:normal;
@@ -183,19 +221,19 @@
             padding-left:45px;  /*  (help,width - 190 - 20) / 2    */
         }
     }
-    @media only screen and (max-width: 507px), only screen and (max-height: 682px) {
+    @media only screen and (max-width: 528px), only screen and (max-height: 698px) {
         .brnodisplay {display:block;}
-        #puzzledate {
+        .puzzledate {
             left:10px;
             top:79px;
             font-weight:normal;
         }
         .lblPuzzleNo {
-            left:10px !important;
+            left:10px;
             top:25px;
         }
         #puzzleNo{
-            left:18px !important;
+            left:18px;
             top:25px;
         }
     }
@@ -212,15 +250,22 @@
         <b>please rotate your device.</b>
     </p>
 </div>
-<div style="position:absolute; top:0px; left:0px;">
-    <label class="statusLine" style="font-weight:bold; left:10px;">Moves: </label><label id="moves" class="statusLine" style="left:10px;"></label>
+<div id="content" style="position:absolute; top:0px; left:0px;">
+    <label class="statusLine" style="left:10px;">Moves: </label><span id="moves" class="statusLine" style="left:10px;"></span>
     <button id="reset" class="statusLine button">Reset</button>
     <button id="undo" class="statusLine button" disabled="disabled">Undo Last</button>
 
     <br class="brnodisplay"/>
-    <label class="statusLine lblPuzzleNo" for="puzzleNo" style="font-weight:bold; left:50px;">Puzzle #: </label>
-    <input id="puzzleNo" class="statusLine" style="left:50px; width:80px;" title="Enter a number and hit {Enter} to select a specific puzzle"></input>
-    <span class="statusLine" id="puzzledate"></span>
+    <span class="tip-wrapper">
+        <label class="statusLine lblPuzzleNo tip-trigger" for="puzzleNo" aria-describedby="tip-puzzleno">Puzzle #: </label>
+        <input id="puzzleNo" class="statusLine tip-trigger" aria-describedby="tip-puzzleno"></input>
+        <div id="tip-puzzleno" role="tooltip">Enter a number and hit {Enter} to select a specific puzzle</div>
+    </span>
+
+    <span class="statusLine puzzledate">
+        <span id="puzzledate"></span><span id="isSolved" class="tip-trigger" aria-describedby="tip-puzzlesolved"> *</span>
+        <div id="tip-puzzlesolved" role="tooltip">You have solved this puzzle!</div>
+    </span>
 
     <!-- "Stats icon" -->
     <a id="statsParent" class="menuicon" style="right:60px;" onclick="showStats()">
@@ -414,7 +459,7 @@ document.getElementById("undo").addEventListener("click", function(e) {
 
 
 // puzzle number change event
-document.getElementById("puzzleNo").addEventListener("change", function(e) {
+minpPuzzleNo.addEventListener("change", function(e) {
     mStartPattern = numberToPattern(e.target.value);
     resetCircles(mStartPattern);
     e.target.blur();
@@ -576,6 +621,8 @@ function drawCanvas(pattern, initialize) {
     if (viewWidth < mMinWidth) {viewWidth = mMinWidth;}
     mCanvas.height = viewWidth;
     mCanvas.width = viewWidth;
+    //document.getElementById("content").style.width = (mBorderLeft + viewWidth + mBorderRight) + "px";
+    
     try {
         let adbar = document.getElementById("bottomAdbar");
         adbar.style.width = viewWidth + "px";
