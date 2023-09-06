@@ -381,6 +381,7 @@ var mMoves = 0, mIncludeDiagonals = true;
 var mLastX = 0, mLastY = 0;
 
 const minpPuzzleNo = document.getElementById("puzzleNo");
+var mTodayPuzzleNo = 0, mCurrentPuzzleNo = 0;
 const mCanvas = document.getElementById("myCanvas");
 const mContext = mCanvas.getContext("2d");
 mContext.lineWidth = 1;
@@ -450,7 +451,8 @@ mCanvas.addEventListener("mousedown", function(e) {
 
 // Reset button event
 document.getElementById("reset").addEventListener("click", function(e) {
-    resetCircles(mStartPattern);
+    const redrawToday = (mTodayPuzzleNo == mCurrentPuzzleNo);
+    resetCircles(mStartPattern, redrawToday);
 });
 
 
@@ -462,8 +464,13 @@ document.getElementById("undo").addEventListener("click", function(e) {
 
 // puzzle number change event
 minpPuzzleNo.addEventListener("change", function(e) {
-    mStartPattern = numberToPattern(e.target.value);
-    resetCircles(mStartPattern);
+    const puzzleNo = e.target.value;
+    if (mTodayPuzzleNo == puzzleNo) {
+        btnTodaysPuzzle();
+    } else {
+        mStartPattern = numberToPattern(puzzleNo);
+        resetCircles(mStartPattern);
+    }
     e.target.blur();
 });
 
@@ -507,7 +514,7 @@ function btnTodaysPuzzle(init) {
     mStartPattern = todaysStart(mTargetPattern);   // Also calls function that sets mTodayPuzzleDate and mTodayDateText.
 
     if (init === true) {
-        drawCanvas(mStartPattern);
+        drawCanvas(mStartPattern);  // also calls resetCircles()
     } else {
         resetCircles(mStartPattern);
     }
@@ -516,6 +523,8 @@ function btnTodaysPuzzle(init) {
     // must be after resetCircles()
     document.getElementById("puzzledate").innerText = "Puzzle for " + mTodayDateText;
     isDaily = true;
+    mTodayPuzzleNo = mCurrentPuzzleNo;
+
 
     // If not already played today, update dailyGamesPlayed stat
     loadPersist();
@@ -795,7 +804,9 @@ function initCircles(pattern) {
     resetCircles(pattern);
     mInitialized = true;
 }
-function resetCircles(pattern) {
+function resetCircles(pattern, redrawToday) {
+    if (typeof redrawToday === 'undefined') {redrawToday = false;}
+
     var pIndex = 0;
     for (let y=0; y<4; y++) {
         for (let x=0; x<4; x++) {
@@ -811,14 +822,18 @@ function resetCircles(pattern) {
     }
 
     mCircleArray.forEach(drawCircle);
-    minpPuzzleNo.value = patternToNumber(pattern);
+    mCurrentPuzzleNo = patternToNumber(pattern);
+    minpPuzzleNo.value = mCurrentPuzzleNo;
     mCurrentPattern = pattern.slice();
 
     mMoves = 0;    // Must be after clickCircle()
     mlblMoves.innerText = 0;
-    document.getElementById("puzzledate").innerText = "";
-    document.getElementById("isSolved").style.display = "none";
-    isDaily = false;
+
+    if (redrawToday === false) {
+        document.getElementById("puzzledate").innerText = "";
+        document.getElementById("isSolved").style.display = "none";
+        isDaily = false;
+    }
 
     const btnUndo = document.getElementById("undo");
     btnUndo.disabled = "disabled";
