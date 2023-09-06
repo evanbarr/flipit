@@ -164,13 +164,13 @@
         position:absolute;
         left:332px;
         top:47px;
+        line-height:20px;
         font-weight:bold;
         font-size:12px;
         /* overflow:hidden; */
         user-select:none; 
     }
     #isSolved {
-        display:none;
         vertical-align:middle;
         font-weight:bold;
         font-size:18px;
@@ -263,7 +263,7 @@
         <div id="tip-puzzleno" role="tooltip">Enter a number and hit {Enter} to select a specific puzzle</div>
     </span>
 
-    <span class="statusLine puzzledate">
+    <span class="puzzledate">
         <span id="puzzledate"></span><span id="isSolved" class="tip-trigger" aria-describedby="tip-puzzlesolved"> *</span>
         <div id="tip-puzzlesolved" role="tooltip">You have solved this puzzle!</div>
     </span>
@@ -532,7 +532,7 @@ function btnTodaysPuzzle(init) {
         }
 
         document.getElementById("notSolved").style.display = "inline";
-	document.getElementById("isSolved").style.display = "none";
+        document.getElementById("isSolved").style.display = "none";
 
         updatePersisted();
     } else if (daysSinceLastWin == 0) {
@@ -818,6 +818,7 @@ function resetCircles(pattern) {
     mlblMoves.innerText = 0;
     document.getElementById("puzzledate").innerText = "";
     document.getElementById("isSolved").style.display = "none";
+    document.getElementById("notSolved").style.display = "inline";
     isDaily = false;
 
     const btnUndo = document.getElementById("undo");
