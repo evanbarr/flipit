@@ -363,7 +363,7 @@ const mTargetPuzzleNo = patternToNumber(mTargetPattern);
 const colorBackground = "white", colorForground = "black", colorClicked = "lightcyan";  //greenyellow
 
 const neverPlayed = "1900-01-01";
-var mTodayDateText = "", mTodayPuzzleDate = neverPlayed, isDaily = false;
+var mTodayDateText = "", mTodayPuzzleDate = neverPlayed, mIsDaily = false, mJustWon = false;
 const persistName = "eb-flipit-stats";
 var persist = {
     currentStreak: 0,
@@ -421,7 +421,7 @@ mCanvas.addEventListener("mousedown", function(e) {
         blinkCircles();
 
         // Only update stats if we didn't already solve today's puzzle
-        const daysSinceLastWin = isDaily ? dateDiff(persist.LastWinDate, mTodayPuzzleDate): 0;
+        const daysSinceLastWin = mIsDaily ? dateDiff(persist.LastWinDate, mTodayPuzzleDate): 0;
         if (daysSinceLastWin > 0) {
             persist.dailyGamesWon++;
             persist.LastWinDate = mTodayPuzzleDate;
@@ -445,6 +445,9 @@ mCanvas.addEventListener("mousedown", function(e) {
 
             updatePersisted();
         }
+
+        showStats();
+        mJustWon = true;
     }
 });
 
@@ -522,12 +525,20 @@ function btnTodaysPuzzle(init) {
     
     // must be after resetCircles()
     document.getElementById("puzzledate").innerText = "Puzzle for " + mTodayDateText;
-    isDaily = true;
+    mIsDaily = true;
     mTodayPuzzleNo = mCurrentPuzzleNo;
 
 
-    // If not already played today, update dailyGamesPlayed stat
     loadPersist();
+
+
+    // If never played before, show help
+    if (persist.dailyGamesPlayed == 0  &&  init == true) {
+        showHelp();
+    }
+
+
+    // If not already played today, update dailyGamesPlayed stat
     const daysSinceLastPlay = dateDiff(mTodayPuzzleDate, persist.LastPlayDate);
     const daysSinceLastWin = dateDiff(mTodayPuzzleDate, persist.LastWinDate);
     if (daysSinceLastPlay > 0) {
@@ -604,6 +615,11 @@ function showHiddenElement(elementId, forceHide) {
 }
 function hideAllMenus(currentId) {
     if (typeof currentId === 'undefined') {currentId = "";}
+
+    if (mJustWon === true) {
+        mJustWon = false;
+        if (currentId == "myCanvas") {currentId = "stats";}
+    }
 
     // Close all menus except the one that was clicked
     if (currentId != "topMenu") showHiddenElement("topMenu", true);
@@ -832,7 +848,7 @@ function resetCircles(pattern, redrawToday) {
     if (redrawToday === false) {
         document.getElementById("puzzledate").innerText = "";
         document.getElementById("isSolved").style.display = "none";
-        isDaily = false;
+        mIsDaily = false;
     }
 
     const btnUndo = document.getElementById("undo");
