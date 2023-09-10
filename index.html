@@ -656,11 +656,11 @@ function drawCanvas(pattern, initialize) {
     try {
         let adbar = document.getElementById("bottomAdbar");
         adbar.style.width = viewWidth + "px";
-        adbar.style.top = mCanvas.top + viewWidth + 17 + "px";
+        adbar.style.top = mCanvas.top + viewWidth - 4 + "px";
 
         adbar = document.getElementById("isblocked");
         adbar.style.width = viewWidth + "px";
-        adbar.style.top = mCanvas.top + viewWidth + 17 + "px";
+        adbar.style.top = mCanvas.top + viewWidth - 4 + "px";
     } catch(err) {
         console.log(err.message);
     }
