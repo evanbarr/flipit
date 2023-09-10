@@ -270,7 +270,7 @@
     </span>
 
     <!-- "Stats icon" -->
-    <a id="statsParent" class="menuicon" style="right:60px;" onclick="showStats()">
+    <a id="statsParent" class="menuicon" style="right:60px;" onclick="showStats()" onblur="showHiddenElement('stats', true)">
         <i id="statsParent" class="fa fa-line-chart"></i>
         <div id="stats" class="menuContent menuText" style="width:300px;">
             <h1>Daily FlipIT Stats</h1>
@@ -286,7 +286,7 @@
     </a>
     
     <!-- "Help icon" -->
-    <a id="helpParent" class="menuicon" style="right:30px;" onclick="showHelp()">
+    <a id="helpParent" class="menuicon" style="right:30px;" onclick="showHelp()" onblur="showHiddenElement('help', true)">
         <i id="helpParent" class="fa fa-question-circle"></i>
         <div id="help" class="menuContent menuText">
             <h1>FlipIt</h1>
@@ -312,7 +312,7 @@
     </a>
     
     <!-- "Hamburger menu" / "Bar icon" to toggle the navigation links -->
-    <a id="topMenuParent" class="menuicon" onclick="showMenu()">
+    <a id="topMenuParent" class="menuicon" onclick="showMenu()" onblur="showHiddenElement('topMenu', true)">
         <i id="topMenuParent" class="fa fa-bars"></i>
         <div id="topMenu" class="menuContent">
             <button id="target" class="menuItem" onclick="btnTarget()">Show Target</button>
@@ -453,6 +453,7 @@ mCanvas.addEventListener("mousedown", function(e) {
 });
 
 
+
 // Reset button event
 document.getElementById("reset").addEventListener("click", function(e) {
     const redrawToday = (mTodayPuzzleNo == mCurrentPuzzleNo);
@@ -466,6 +467,7 @@ document.getElementById("undo").addEventListener("click", function(e) {
 });
 
 
+
 // puzzle number change event
 minpPuzzleNo.addEventListener("change", function(e) {
     const puzzleNo = e.target.value;
@@ -477,13 +479,6 @@ minpPuzzleNo.addEventListener("change", function(e) {
     }
     e.target.blur();
 });
-
-
-// Google adsense iframe
-// document.getElementById("aswift_1").addEventListener("click", function(e) {
-//     parent.pageClick(e);
-// });
-document.getElementById("aswift_1").setAttribute("onclick", "parent.pageClick()");
 
 
 
