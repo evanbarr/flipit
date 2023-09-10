@@ -483,14 +483,14 @@ minpPuzzleNo.addEventListener("change", function(e) {
 
 
 // diagonals choice change event
-document.getElementById("diagonals").addEventListener("change", function(e) {
-    mIncludeDiagonals = e.target.checked;
-});
+// document.getElementById("diagonals").addEventListener("change", function(e) {
+//     mIncludeDiagonals = e.target.checked;
+// });
+
 
 
 // hide menus when window loses focus
-window.onblur = function() {pageClick();}
-
+window.addEventListener("blur", function(e) {hideAllMenus();});
 
 
 // ------------------------
