@@ -18,7 +18,8 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0549784498739741" crossorigin="anonymous"></script>
     <!-- End Google -->
 
-    <title>Flip.IT</title>
+    <title>Flip.IT puzzle - brain teaser</title>
+    <meta name="description" content="A new brain teaser puzzle every day.  Every daily and random puzzle can be solved in three moves.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://ico.xink.in/pog_arrow_white.png" rel="icon" />
 </head>
@@ -37,7 +38,7 @@
         user-select:none;
         font-weight:bold;
     }
-    #myCanvas {
+    #canvas-puzzle {
         border:0px solid; 
         position:relative; 
         left:10px; 
@@ -246,7 +247,7 @@
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-<div id="topDiv" style="width:100%">
+<div id="topDiv" class="flipit puzzle" style="width:100%">
 <div class="noLandscape">
     <p>To enable this app to fit your screen<br/>
         <b>please rotate your device.</b>
@@ -270,7 +271,7 @@
     </span>
 
     <!-- "Stats icon" -->
-    <a id="statsParent" class="menuicon" style="right:60px;" onclick="showStats()" onblur="showHiddenElement('stats', true)">
+    <a id="statsParent" class="menuicon" style="right:60px;" onclick="showStats()" xonblur="showHiddenElement('stats', true)">
         <i id="statsParent" class="fa fa-line-chart"></i>
         <div id="stats" class="menuContent menuText" style="width:300px;">
             <h1>Daily FlipIT Stats</h1>
@@ -286,7 +287,7 @@
     </a>
     
     <!-- "Help icon" -->
-    <a id="helpParent" class="menuicon" style="right:30px;" onclick="showHelp()" onblur="showHiddenElement('help', true)">
+    <a id="helpParent" class="menuicon" style="right:30px;" onclick="showHelp()" xonblur="showHiddenElement('help', true)">
         <i id="helpParent" class="fa fa-question-circle"></i>
         <div id="help" class="menuContent menuText">
             <h1>FlipIt</h1>
@@ -312,7 +313,7 @@
     </a>
     
     <!-- "Hamburger menu" / "Bar icon" to toggle the navigation links -->
-    <a id="topMenuParent" class="menuicon" onclick="showMenu()" onblur="showHiddenElement('topMenu', true)">
+    <a id="topMenuParent" class="menuicon" onclick="showMenu()" xonblur="showHiddenElement('topMenu', true)">
         <i id="topMenuParent" class="fa fa-bars"></i>
         <div id="topMenu" class="menuContent">
             <button id="target" class="menuItem" onclick="btnTarget()">Show Target</button>
@@ -326,7 +327,7 @@
     </a>
     
     <br/>
-    <canvas id="myCanvas">Your browser does not support the HTML5 canvas tag.</canvas>     
+    <canvas id="canvas-puzzle">This is where the flipit puzzle would have been displayed.  However, your browser does not support the HTML5 canvas tag or javascript is disabled.</canvas>     
 </div>
 
 <span id="isblocked" class="bottomAdbar" style="display:none;"></span>
@@ -383,7 +384,7 @@ var mLastX = 0, mLastY = 0;
 
 const minpPuzzleNo = document.getElementById("puzzleNo");
 var mTodayPuzzleNo = 0, mCurrentPuzzleNo = 0;
-const mCanvas = document.getElementById("myCanvas");
+const mCanvas = document.getElementById("canvas-puzzle");
 const mContext = mCanvas.getContext("2d");
 mContext.lineWidth = 1;
 mContext.fillStyle = colorForground;
@@ -491,6 +492,7 @@ minpPuzzleNo.addEventListener("change", function(e) {
 
 // hide menus when window loses focus
 window.addEventListener("blur", function(e) {hideAllMenus();});
+
 
 
 // ------------------------
@@ -613,6 +615,8 @@ function showStats() {showHiddenElement("stats")}
 function showHiddenElement(elementId, forceHide) {
 	// Set forceHide = true to not show element if it is already hidden
     if (typeof forceHide === 'undefined') {forceHide = false;}
+    if (forceHide === true) console.log(elementId);
+    
 
     var x = document.getElementById(elementId);
     if (x.style.display === "block") {
@@ -626,7 +630,7 @@ function hideAllMenus(currentId) {
 
     if (mJustWon === true) {
         mJustWon = false;
-        if (currentId == "myCanvas") {currentId = "stats";}
+        if (currentId == "canvas-puzzle"  ||  currentId == "content") {currentId = "stats";}
     }
 
     // Close all menus except the one that was clicked
