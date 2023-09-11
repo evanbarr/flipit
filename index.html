@@ -448,8 +448,10 @@ mCanvas.addEventListener("mousedown", function(e) {
             updatePersisted();
         }
 
-        showStats();
-        mJustWon = true;
+        if (mIsDaily === true) {
+            showStats();
+            mJustWon = true;
+        }
     }
 });
 
