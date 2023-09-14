@@ -133,8 +133,24 @@
         height:20px;
         margin:3px auto;
     }
+    .menuButton {
+        height:30px;
+        font-size:1em;
+    }
     .menuText {
         color:white;
+    }
+    .menuAnimateInit {
+        display:block !important;
+        visibility:hidden;
+        opacity:0;
+        -webkit-transition: all 700ms cubic-bezier(.2, .7, 1, .1);   /* https://www.cssportal.com/css-cubic-bezier-generator/ */
+        transition: all 700ms cubic-bezier(.2, .7, 1, .1); 
+        /* transition: all 700ms cubic-bezier(.2, 1.7, .6, -.7); */
+    }
+    .menuAnimateShow {
+        visibility:visible !important;
+        opacity:1 !important;
     }
     #help {
         width:260px;
@@ -143,6 +159,23 @@
     }
     .solveMsg{
         padding-top:28px !important;
+        animation-name: animSolveMsg;
+        animation-duration: 2s;
+    }
+    @keyframes animSolveMsg {
+        from {color:darkred; transform: rotateY(0deg);}
+        to {color:lightcyan; transform: rotateY(-360deg);}
+    }
+    .flipit {
+        animation-name:animFlipit;
+        animation-duration:5s;
+        animation-iteration-count:infinite;
+    }
+    @keyframes animFlipit {
+        0% {color:white; transform: rotateX(0deg);}
+        90% {color:white; transform: rotateX(0deg);}
+        95% {color:black; transform: rotateX(180deg);}
+        100% {color:white; transform: rotateX(360deg);}
     }
     #notSolved {
         display:inline;
@@ -247,7 +280,7 @@
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-<div id="topDiv" class="flipit puzzle" style="width:100%">
+<div id="topDiv" class="flipit-puzzle" style="width:100%">
 <div class="noLandscape">
     <p>To enable this app to fit your screen<br/>
         <b>please rotate your device.</b>
@@ -274,14 +307,14 @@
     <a id="statsParent" class="menuicon" style="right:60px;" onclick="showStats()">
         <i id="statsParent" class="fa fa-line-chart"></i>
         <div id="stats" class="menuContent menuText" style="width:300px;">
-            <h1>Daily FlipIT Stats</h1>
+            <h1 class="flipit">Daily FlipIT Stats</h1>
             <table>
                 <tr><td class="menuLabel">Played</td>        <td class="menuData" id="statsPlayed">0</td></tr>
                 <tr><td class="menuLabel">Solved</td>        <td class="menuData" id="statsSolved">0</td></tr>
                 <tr><td class="menuLabel">Win %</td>         <td class="menuData" id="statsWinPct">0%</td></tr>
                 <tr><td class="menuLabel">Current Streak</td><td class="menuData" id="statsStreak">0</td></tr>
                 <tr><td class="menuLabel">Max Streak</td>    <td class="menuData" id="statsMaxStreak">0</td></tr>
-                <tr><td class="menuData solveMsg" colspan="2">You have <span id="notSolved">not </span>solved today's puzzle!</td></tr>
+                <tr><td class="menuData solveMsg" id="solveMsg" colspan="2">You have <span id="notSolved">not </span>solved today's puzzle!</td></tr>
             </table>
         </div>
     </a>
@@ -290,8 +323,8 @@
     <a id="helpParent" class="menuicon" style="right:30px;" onclick="showHelp()">
         <i id="helpParent" class="fa fa-question-circle"></i>
         <div id="help" class="menuContent menuText">
-            <h1>FlipIt</h1>
-            <p style="color:darkred; text-align:center; margin-top:-6px;">Solve in 3 moves</p>
+            <h1 class="flipit">FlipIt</h1>
+            <p style="color:lightcyan; font-weight:bold; text-align:center; margin-top:-6px;">Solve in 3 moves</p>
             <p>The objective is to get the puzzle to look like this:<br/>
             <canvas id="objective" class="targetImage">Your browser does not support the HTML5 canvas tag.</canvas>
             </p>
@@ -304,7 +337,7 @@
                and unlimited random puzzles.  You can also select a puzzle by its number.  This allows
                you to solve the same puzzle as your friends.
             </p>
-            <p>For the puzzle published in the August 2023 Mensa Bulletin, enter puzzle #48449.
+            <p style="color:lightcyan;">For the puzzle published in the August 2023 Mensa Bulletin, enter puzzle #48449.
             </p>
             <p style="color:black; text-align:center; font-size:15px;">Another fine HaxWare product<br/>
                By Evan A. Barr<br/>flipit at barr.rocks
@@ -316,9 +349,9 @@
     <a id="topMenuParent" class="menuicon" onclick="showMenu()">
         <i id="topMenuParent" class="fa fa-bars"></i>
         <div id="topMenu" class="menuContent">
-            <button id="target" class="menuItem" onclick="btnTarget()">Show Target</button>
-            <button id="random" class="menuItem" onclick="btnRandom()">Random Puzzle</button>
-            <button id="todays" class="menuItem" onclick="btnTodaysPuzzle()">Today's Puzzle</button>        
+            <button id="target" class="menuItem menuButton" onclick="btnTarget()">Show Target</button>
+            <button id="random" class="menuItem menuButton" onclick="btnRandom()">Random Puzzle</button>
+            <button id="todays" class="menuItem menuButton" onclick="btnTodaysPuzzle()">Today's Puzzle</button>        
 
             <!-- <hr/>
             <input type="checkbox" id="diagonals" class="menuItem" checked>
@@ -411,6 +444,24 @@ btnTodaysPuzzle(true);   // Always start with the daily puzzle.
 // ------------------------
 // Events
 //
+
+// Enable passive option for browsers that support it
+let mPassiveIfSupported = false;
+
+try {
+  window.addEventListener(
+    "test",
+    null,
+    Object.defineProperty({}, "passive", {
+      get() {
+        mPassiveIfSupported = { passive: true };
+      },
+    }),
+  );
+} catch (err) {}
+
+
+
 // Canvas Mouse-click event
 mCanvas.addEventListener("mousedown", function(e) {
     const [x, y] = getMousePosition(mCanvas, e);
@@ -449,11 +500,12 @@ mCanvas.addEventListener("mousedown", function(e) {
         }
 
         if (mIsDaily === true) {
-            showStats();
+            statsAnimate();
+            //showStats();
             mJustWon = true;
         }
     }
-});
+}, mPassiveIfSupported);
 
 
 
@@ -461,13 +513,13 @@ mCanvas.addEventListener("mousedown", function(e) {
 document.getElementById("reset").addEventListener("click", function(e) {
     const redrawToday = (mTodayPuzzleNo == mCurrentPuzzleNo);
     resetCircles(mStartPattern, redrawToday);
-});
+}, mPassiveIfSupported);
 
 
 // Undo button event
 document.getElementById("undo").addEventListener("click", function(e) {
     Undo(e.target);
-});
+}, mPassiveIfSupported);
 
 
 
@@ -481,7 +533,7 @@ minpPuzzleNo.addEventListener("change", function(e) {
         resetCircles(mStartPattern);
     }
     e.target.blur();
-});
+}, mPassiveIfSupported);
 
 
 
@@ -493,8 +545,35 @@ minpPuzzleNo.addEventListener("change", function(e) {
 
 
 // hide menus when window loses focus
-window.addEventListener("blur", function(e) {hideAllMenus();});
+window.addEventListener("blur", function(e) {hideAllMenus();}, mPassiveIfSupported);
 
+
+// stats - end transition
+document.getElementById("stats").addEventListener("transitionend", function(e) {
+    const el = document.getElementById("stats");
+    el.classList.remove("menuAnimateInit");
+    el.classList.remove("menuAnimateShow");
+    el.style.display = "block";
+}, true);
+function statsAnimate() {
+    const eMsg = document.getElementById("solveMsg");
+    eMsg.style.animationDelay = "1s";
+    eMsg.style.color = "darkred";
+
+    const eStats = document.getElementById("stats");
+    eStats.classList.add("menuAnimateInit");
+
+    // Delay required because changing to Display:block in menuAnimateInit class
+    setTimeout(function(){ 
+        eStats.classList.add("menuAnimateShow"); 
+    }, 100);
+
+    // Delay must be till menu animation and text animation have completed 
+    setTimeout(function(){ 
+        eMsg.style.animationDelay = "";
+        eMsg.style.color = "";
+    }, 3000);
+}
 
 
 // ------------------------
@@ -617,7 +696,7 @@ function showStats() {showHiddenElement("stats")}
 function showHiddenElement(elementId, forceHide) {
 	// Set forceHide = true to not show element if it is already hidden
     if (typeof forceHide === 'undefined') {forceHide = false;}
-    if (forceHide === true) console.log(elementId);
+    //if (forceHide === true) console.log(elementId);
     
 
     var x = document.getElementById(elementId);
