@@ -114,7 +114,7 @@
         z-index:100;
         background:gray;
     }
-    .menuContent h1 {
+    .menuContent h1, .menuContent h1 span {
         font-size:22px;
         text-align:center;
         text-decoration:underline;
@@ -307,7 +307,8 @@
     <a id="statsParent" class="menuicon" style="right:60px;" onclick="showStats()">
         <i id="statsParent" class="fa fa-line-chart"></i>
         <div id="stats" class="menuContent menuText" style="width:300px;">
-            <h1 class="flipit">Daily FlipIT Stats</h1>
+            <!-- <h1 class="flipit">Daily FlipIT Stats</h1> -->
+            <h1>Daily <span class="flipit" style="display:inline-block;">FlipIT</span> Stats</h1>
             <table>
                 <tr><td class="menuLabel">Played</td>        <td class="menuData" id="statsPlayed">0</td></tr>
                 <tr><td class="menuLabel">Solved</td>        <td class="menuData" id="statsSolved">0</td></tr>
