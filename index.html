@@ -110,7 +110,7 @@
         right:0;
         padding:5px;
         overflow-y:auto;
-        max-height:98vh;
+        max-height:93vh;
         z-index:100;
         background:gray;
     }
@@ -137,6 +137,8 @@
         height:30px;
         font-size:1em;
     }
+
+    
     .menuText {
         color:white;
     }
@@ -152,10 +154,116 @@
         visibility:visible !important;
         opacity:1 !important;
     }
+
+    .menuTopper {
+        margin: 2px -20px 20px -30px;
+        padding: 0 20px 8px 20px;
+        border-bottom: 1px solid;
+    }
+
+    #helpOnStartParent {
+        margin-left: 4px;
+        /* vertical-align: bottom; */
+        font-weight:normal;
+        font-size: smaller;
+        color:black;
+    }
+    .checkboxSlider input[type="checkbox"] {
+        background-image: -webkit-linear-gradient(hsla(0,0%,0%,.1), hsla(0,0%,100%,.1)),
+                        -webkit-linear-gradient(left, lightgrey 50%, lightcyan 50%);
+        background-size: 100% 100%, 200% 100%;
+        background-position: 0 0, 15px 0;
+        border-radius: 25px;
+        box-shadow: inset 0 1px 4px hsla(0,0%,0%,.5),
+                    inset 0 0 10px hsla(0,0%,0%,.5),
+                    0 0 0 1px hsla(0,0%,0%,.1),
+                    0 -1px 2px 2px hsla(0,0%,0%,.25),
+                    0 2px 2px 2px hsla(0,0%,100%,.75);
+        cursor: pointer;
+        height: 19px;
+        padding-right: 25px;
+        width: 61px;
+        -webkit-appearance: none;
+        -webkit-transition: .25s;
+    }
+    .checkboxSlider input[type="checkbox"]::after {
+        background-color: #eee;
+        background-image: -webkit-linear-gradient(hsla(0,0%,100%,.1), hsla(0,0%,0%,.1));
+        border-radius: 19px;
+        box-shadow: inset 0 1px 1px 1px hsla(0,0%,100%,1),
+                    inset 0 -1px 1px 1px hsla(0,0%,0%,.25),
+                    0 1px 3px 1px hsla(0,0%,0%,.5),
+                    0 0 2px hsla(0,0%,0%,.25);
+        content: 'No';
+        text-align: center;
+        padding-top: 1px;
+        display: block;
+        height: 19px;
+        width: 36px;
+    }
+    .checkboxSlider input[type="checkbox"]:checked {
+        background-position: 0 0, 35px 0;
+        padding-left: 25px;
+        padding-right: 0;
+    }
+    .checkboxSlider input[type="checkbox"]:checked::after {
+        content: 'Yes';
+    }
+
+    .btnClose {
+        display: block;
+        position: absolute;
+        right: 8px;
+        top: 9px;
+        width: 20px;
+        height: 20px;
+        margin: 0;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background-color: inherit;
+        transition: all 150ms;
+        
+        .cross {
+            display: block;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: none;
+            position: relative;
+            width: 20px;
+            height: 20px;
+
+            &:before,
+            &:after {
+                content: '';
+                position: absolute;
+                top: 9px;  /* (crossHeight - thickness) / 2  */
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: white;
+                border-radius: 4px;
+            }
+
+            &:before {transform: rotate(45deg);}
+            &:after {transform: rotate(-45deg);}
+            span {display: block;}
+        }
+        
+        &:hover,
+        &:focus {
+            transform: rotateZ(90deg);
+            background: gray;
+        }
+    }
+
+
     #help {
         width:260px;
         padding-left:20px;
-        padding-right:20px
+        padding-right:20px;
+        overflow-x:hidden;
     }
     .solveMsg{
         padding-top:28px !important;
@@ -321,9 +429,18 @@
     </a>
     
     <!-- "Help icon" -->
-    <a id="helpParent" class="menuicon" style="right:30px;" onclick="showHelp()">
+    <a id="helpParent" class="menuicon" style="right:30px;">
         <i id="helpParent" class="fa fa-question-circle"></i>
         <div id="help" class="menuContent menuText">
+            <div id="checkboxSlider" class="checkboxSlider menuTopper">
+                <input type="checkbox" id="helpOnStart" class="menuItem" checked>
+                <label for="helpOnStart" id="helpOnStartParent" class="menuItem menuText">Show this help on start</label>
+            </div>
+
+            <button type="button" class="btnClose">
+                <span class="cross"></span>
+            </button>
+              
             <h1 class="flipit">FlipIt</h1>
             <p style="color:lightcyan; font-weight:bold; text-align:center; margin-top:-6px;">Solve in 3 moves</p>
             <p>The objective is to get the puzzle to look like this:<br/>
@@ -400,6 +517,7 @@ const colorBackground = "white", colorForground = "black", colorClicked = "light
 
 const neverPlayed = "1900-01-01";
 var mTodayDateText = "", mTodayPuzzleDate = neverPlayed, mIsDaily = false, mJustWon = false;
+
 const persistName = "eb-flipit-stats";
 var persist = {
     currentStreak: 0,
@@ -409,6 +527,12 @@ var persist = {
     LastWinDate: neverPlayed,
     LastPlayDate: neverPlayed
 };   // Win date and play date refer to daily game
+
+const optionsName = "eb-flipit-options";
+var options = {
+    helpOnStart: true
+}
+
 
 var mBoxWidth = 0, mRadius = 0;
 
@@ -433,8 +557,11 @@ mCanvas.left = mBorderLeft;
 mCanvas.top = mBorderTop;
 
 
-drawObjective(document.getElementById("objective"), mTargetPattern, helpMenuWidth)
-//loadPersist();   // Now done in btnTodaysPuzzle()
+drawObjective(document.getElementById("objective"), mTargetPattern, helpMenuWidth);  // Show mini-puzzle on help menu.
+loadOptions();
+document.getElementById("helpOnStart").checked = options.helpOnStart;
+if (options.helpOnStart == true) {showHelp();}
+//loadStats();   // Now done in btnTodaysPuzzle()
 
 var mStartPattern = testPattern;
 //drawCanvas(mStartPattern);   // Replaced with below
@@ -497,7 +624,7 @@ mCanvas.addEventListener("mousedown", function(e) {
             document.getElementById("notSolved").style.display = "none";
             document.getElementById("isSolved").style.display = "inline";
 
-            updatePersisted();
+            saveStats();
         }
 
         if (mIsDaily === true) {
@@ -521,6 +648,20 @@ document.getElementById("reset").addEventListener("click", function(e) {
 document.getElementById("undo").addEventListener("click", function(e) {
     Undo(e.target);
 }, mPassiveIfSupported);
+
+
+// Help menu click event
+document.getElementById("helpParent").addEventListener("click", function(e) {
+    showHelp(e.target.id);
+}, mPassiveIfSupported);
+
+
+
+// helpOnStart choice change event
+document.getElementById("helpOnStart").addEventListener("change", function(e) {
+    options.helpOnStart = e.target.checked;
+    saveOptions();
+});
 
 
 
@@ -621,13 +762,13 @@ function btnTodaysPuzzle(init) {
     mTodayPuzzleNo = mCurrentPuzzleNo;
 
 
-    loadPersist();
+    loadStats();
 
 
     // If never played before, show help
-    if (persist.dailyGamesPlayed == 0  &&  init == true) {
-        showHelp();
-    }
+    // if (persist.dailyGamesPlayed == 0  &&  init == true) {   <<< Now showing on game start based on options
+    //     showHelp();
+    // }
 
 
     // If not already played today, update dailyGamesPlayed stat
@@ -646,7 +787,7 @@ function btnTodaysPuzzle(init) {
         document.getElementById("notSolved").style.display = "inline";
         document.getElementById("isSolved").style.display = "none";
 
-        updatePersisted();
+        saveStats();
     } else if (daysSinceLastWin == 0) {
         document.getElementById("notSolved").style.display = "none";
         document.getElementById("isSolved").style.display = "inline";
@@ -655,8 +796,8 @@ function btnTodaysPuzzle(init) {
 
 
 function numberToPattern(number) {
-    let bits = (n,b=32) => [...Array(b)].map((x,i)=>(n>>i)&1);
-    let Bitarr = bits(number,16);
+    const bits = (n,b=32) => [...Array(b)].map((x,i)=>(n>>i)&1);
+    const Bitarr = bits(number,16);
     return Bitarr;
 }
 function patternToNumber(pattern) {
@@ -678,6 +819,12 @@ function pageClick(e) {
     const evtobj = e || window.event;
     let id = evtobj.target.id;
     if (id.endsWith("Parent")) {id = id.substring(0, id.length - 6);}
+    if (id == "helpOnStart") {
+        //help element gets click before helpOnStart causing the menu to close.  So, reopen.
+        document.getElementById("help").style.display = "block"; 
+        return;
+    }
+    //if (id == "checkboxSlider") return;
     hideAllMenus(id);
 }
 
@@ -690,15 +837,17 @@ function keyDown(e) {
     }
 }
 
-
+function showHelp(id) {
+    if (typeof id != 'undefined') {if(id == "checkboxSlider") {return;}}    
+    showHiddenElement("help")
+}
 function showMenu() {showHiddenElement("topMenu");}
-function showHelp() {showHiddenElement("help")}
 function showStats() {showHiddenElement("stats")}
 function showHiddenElement(elementId, forceHide) {
 	// Set forceHide = true to not show element if it is already hidden
     if (typeof forceHide === 'undefined') {forceHide = false;}
     //if (forceHide === true) console.log(elementId);
-    
+
 
     var x = document.getElementById(elementId);
     if (x.style.display === "block") {
@@ -707,7 +856,9 @@ function showHiddenElement(elementId, forceHide) {
         x.style.display = "block";
     }
 }
+var l=false;
 function hideAllMenus(currentId) {
+//if (l===true) {alert("yes");} else {l=true}
     if (typeof currentId === 'undefined') {currentId = "";}
 
     if (mJustWon === true) {
@@ -1042,13 +1193,12 @@ function createPuzzle(solution, useToday) {
         flipOnebit(pattern, r);
 
         // Affect other circles
-        const x = r % 4;  // r mod 4 = (0 - 3)
-        const y = Math.floor(r/4);  // = (0 - 3)
+        const x = r % 4;  // r mod 4 = (0 to 3)
+        const y = Math.floor(r/4);  // = (0 to 3)
         //alert("r=" + r.toString() + ", x=" + x.toString() + ", y=" + y.toString())
 
         // Left
-        if (x>0) {flipOnebit(pattern, r-1);
-;}
+        if (x>0) {flipOnebit(pattern, r-1);}
 
 
         // Right
@@ -1160,7 +1310,7 @@ function dateDiff(utcdate1, utcdate2) {
 }
 
 
-function loadPersist() {
+function loadStats() {
     // Since the persisted data only refers to stats for the daily puzzle,
     // this function is called when the daily puzzle is loaded.  Further processing
     // is done by the loader since it has more information.
@@ -1179,10 +1329,20 @@ function loadPersist() {
     document.getElementById("statsStreak").innerText = persist.currentStreak;
     document.getElementById("statsMaxStreak").innerText = persist.maxStreak;
 }
-
-
-function updatePersisted(e) {
+function saveStats() {
     window.localStorage.setItem(persistName, JSON.stringify(persist));
+}
+
+
+function loadOptions() {
+    var data = window.localStorage.getItem(optionsName);
+    if (data) {
+        options = JSON.parse(data);
+    }
+
+}
+function saveOptions() {
+    window.localStorage.setItem(optionsName, JSON.stringify(options));
 }
 
 
