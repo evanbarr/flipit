@@ -30,7 +30,7 @@
 
 <style>
     :root {
-        --app_version: 1.09.005;
+        --app_version: "1.09.007";
 
         --clr_highlight_min: lightcyan;
         --clr_highlight_max: darkred;
@@ -40,8 +40,10 @@
         --clr_menu_text: white;
 
         --clr_background: white;
+        --clr_foreground: black;
         --clr_disk_light: white;
         --clr_disk_dark: black;
+        --clr_disk_clicked: var(--clr_highlight_min);
         --clr_text_plain: black;
         --clr_text_notsolved: darkblue;
 
@@ -52,17 +54,42 @@
         --button_width: 100px;
         --input_width_match_button: calc(var(--button_width) - 6px);
     }
+    .darkMode {
+        --clr_background: black;
+        --clr_foreground: white;
+        --clr_disk_clicked: darkcyan;
 
+        /* Unchanged
+        --clr_highlight_min: lightcyan;
+        --clr_highlight_max: darkred;
+
+        --clr_menu_background: gray;
+        --clr_menuicon_hover: #ddd;
+        --clr_menu_text: white;
+
+        --clr_disk_light: white;
+        --clr_disk_dark: black;
+        --clr_text_plain: black;
+        --clr_text_notsolved: darkblue;
+
+        --clr_background_tooltip: lemonchiffon;
+        --clr_border_tooltip: black;
+        */
+    }
     html {height:100%;}
     body {
         margin-top:0px;
         margin-left:0px;
         overflow-x:hidden;
+        background-color:var(--clr_background);
+        color:var(--clr_foreground);
     }
     label {
         user-select:none;
         font-weight:bold;
     }
+    #topDiv {width:100%}
+    #content {position:absolute; top:0px; left:0px;}
     #canvas-puzzle {
         border:0px solid; 
         position:relative; 
@@ -104,6 +131,9 @@
     #tip-puzzlesolved {
         top:1.3em;
         left:5em;
+    }
+    .version::after {
+        content:var(--app_version);
     }
 
     .statusLine {
@@ -171,6 +201,19 @@
     .menuText {
         color:var(--clr_menu_text);
     }
+    .menuFinePrint {
+        margin-right:4px;
+        color:var(--clr_text_plain);
+        text-align:center;
+        font-size:15px;
+    }
+    .menuBoldPrint {
+        color:var(--clr_highlight_min);
+        font-weight:bold;
+        text-align:center;
+        margin-top:-6px;
+    }
+    .menuHighlight {color:var(--clr_highlight_min);}
     .menuAnimateInit {
         display:block !important;
         visibility:hidden;
@@ -197,6 +240,8 @@
         font-size: smaller;
         color:var(--clr_text_plain);
     }
+    #optDarkMode {margin: 10px 35px 10px 5px;}
+    #optDarkModeParent {font-weight: normal;}
     .checkboxSlider input[type="checkbox"] {
         background-image: -webkit-linear-gradient(hsla(0,0%,0%,.1), hsla(0,0%,100%,.1)),
                         -webkit-linear-gradient(left, lightgrey 50%, var(--clr_highlight_min) 50%);
@@ -294,6 +339,8 @@
         padding-right:20px;
         overflow-x:hidden;
     }
+    #stats {width:300px;}
+    #topMenu {width:190px;}
     .solveMsg{
         padding-top:28px !important;
         animation-name: animSolveMsg;
@@ -326,6 +373,7 @@
         height:190px;
         margin-left:20px;  /*  (help,width - 190 - 20) / 2    */
     }
+    #moves {left:var(--standard_space);}
     .lblPuzzleNo {
         left:50px;
     }
@@ -421,14 +469,14 @@
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-<div id="topDiv" class="flipit-puzzle" style="width:100%">
+<div id="topDiv" class="flipit-puzzle">
 <div class="noLandscape">
     <p>To enable this app to fit your screen<br/>
         <b>please rotate your device.</b>
     </p>
 </div>
-<div id="content" style="position:absolute; top:0px; left:0px;">
-    <label class="statusLine" style="left:var(--standard_space);">Moves: </label><span id="moves" class="statusLine" style="left:var(--standard_space);"></span>
+<div id="content">
+    <label class="statusLine" style="left:var(--standard_space);">Moves: </label><span id="moves" class="statusLine"></span>
     <button id="reset" class="statusLine button">Reset</button>
     <button id="undo" class="statusLine button" disabled="disabled">Undo Last</button>
 
@@ -447,7 +495,7 @@
     <!-- "Stats icon" -->
     <a id="statsParent" class="menuicon" style="right:60px;" onclick="showStats()">
         <i id="statsParent" class="fa fa-line-chart"></i>
-        <div id="stats" class="menuContent menuText" style="width:300px;">
+        <div id="stats" class="menuContent menuText">
             <!-- <h1 class="flipit">Daily FlipIT Stats</h1> -->
             <h1>Daily <span class="flipit" style="display:inline-block;">FlipIT</span> Stats</h1>
             <table>
@@ -475,7 +523,7 @@
             </button>
               
             <h1 class="flipit">FlipIt</h1>
-            <p style="color:var(--clr_highlight_min); font-weight:bold; text-align:center; margin-top:-6px;">Solve in 3 moves</p>
+            <p class="menuBoldPrint">Solve in 3 moves</p>
             <p>The objective is to get the puzzle to look like this:<br/>
             <canvas id="objective" class="targetImage">Your browser does not support the HTML5 canvas tag.</canvas>
             </p>
@@ -488,22 +536,27 @@
                and unlimited random puzzles.  You can also select a puzzle by its number.  This allows
                you to solve the same puzzle as your friends.
             </p>
-            <p style="color:var(--clr_highlight_min);">For the puzzle published in the August 2023 Mensa Bulletin, enter puzzle #48449.
+            <p class="menuHighlight">For the puzzle published in the August 2023 Mensa Bulletin, enter puzzle #48449.
             </p>
-            <p style="color:var(--clr_text_plain); text-align:center; font-size:15px;">Another fine HaxWare product<br/>
-               By Evan A. Barr<br/>flipit at barr.rocks
+            <p class="menuFinePrint">Another fine HaxWare product<br/>
+                &copy; 2023 Evan A. Barr<br/><span class="version">Version: </span>
             </p>
         </div>
     </a>
     
     <!-- "Hamburger menu" / "Bar icon" to toggle the navigation links -->
-    <div id="topMenuParent" class="menuicon" onclick="showMenu()">
+    <div id="topMenuParent" class="menuicon">
         <i id="topMenuParent" class="fa fa-bars"></i>
         <div id="topMenu" class="menuContent">
             <button id="target" class="menuItem menuButton" onclick="btnTarget()">Show Target</button>
             <button id="random" class="menuItem menuButton" onclick="btnRandom()">Random Puzzle</button>
             <button id="todays" class="menuItem menuButton" onclick="btnTodaysPuzzle()">Today's Puzzle</button>        
 
+            <hr/>
+            <div id="optDarkModeDiv" class="checkboxSlider">
+                <input type="checkbox" id="optDarkMode" class="menuItem">
+                <label for="optDarkMode" id="optDarkModeParent" class="menuItem menuText">Dark mode</label>
+            </div>
             <hr/>
             <a id="emailFeedback" class="menuItem menuLink" href="" target="_blank">Send Feedback</a>
             <a id="emailBug" class="menuItem menuLink" href="" target="_blank">Report a Bug</a>
@@ -541,27 +594,25 @@ preventAdSenseHeightChange("bottomAdbar");
 
 
 // Globals
-const testPattern = [1,0,0,0,0,0,1,0,1,0,1,1,1,1,0,1];
+const mTestPattern = [1,0,0,0,0,0,1,0,1,0,1,1,1,1,0,1];
 const mTargetPattern = [1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1];
 const mTargetPuzzleNo = patternToNumber(mTargetPattern);
 
-const root = document.documentElement;
-const mBorderLeft = parseInt(getComputedStyle(root).getPropertyValue("--standard_space"));
+const mDocRoot = document.documentElement;
+const mBorderLeft = parseInt(getComputedStyle(mDocRoot).getPropertyValue("--standard_space"));
 const mBorderRight = mBorderLeft, 
       mBorderTop = 80, 
       mBorderBottom = 110;  // left and top must match the actual position for canvas element from html above.
-const helpMenuWidth = 190;  // The width available to the "target" image displayed in the help menu.
+const mHelpMenuWidth = 190;  // The width available to the "target" image displayed in the help menu.
 const mMinWidth = 287;  // Canvas minimum width to prevent toolbar from getting messy.
 
-const colorBackground = getComputedStyle(root).getPropertyValue("--clr_background"), 
-      colorForground = getComputedStyle(root).getPropertyValue("--clr_text_plain"), 
-      colorClicked = getComputedStyle(root).getPropertyValue("--clr_highlight_min");
+let mColorBackground, mColorForground, mColorClicked, mColorDiskLight, mColorDiskDark;  // Set via loadOptions() and setDarkMode()
 
 const neverPlayed = "1900-01-01";
 var mTodayDateText = "", mTodayPuzzleDate = neverPlayed, mIsDaily = false, mJustWon = false;
 
-const persistName = "eb-flipit-stats";
-var persist = {
+const mDataStatsName = "eb-flipit-stats";
+var mDataStats = {
     currentStreak: 0,
     maxStreak: 0,
     dailyGamesPlayed: 0,
@@ -570,8 +621,8 @@ var persist = {
     LastPlayDate: neverPlayed
 };   // Win date and play date refer to daily game
 
-const optionsName = "eb-flipit-options";
-var options = {
+const mDataOptionsName = "eb-flipit-options";
+var mDataOptions = {
     helpOnStart: true,
     darkMode: false
 }
@@ -588,7 +639,8 @@ var mTodayPuzzleNo = 0, mCurrentPuzzleNo = 0;
 const mCanvas = document.getElementById("canvas-puzzle");
 const mContext = mCanvas.getContext("2d");
 mContext.lineWidth = 1;
-mContext.fillStyle = colorForground;
+mContext.fillStyle = mColorForground;
+mContext.strokeStyle = mColorForground;
 
 var mInitialized = false;
 
@@ -600,14 +652,11 @@ mCanvas.left = mBorderLeft;
 mCanvas.top = mBorderTop;
 
 
-drawObjective(document.getElementById("objective"), mTargetPattern, helpMenuWidth);  // Show mini-puzzle on help menu.
 loadOptions();
-document.getElementById("helpOnStart").checked = options.helpOnStart;
-if (options.darkMode == true) {setDarkMode(true);}
-if (options.helpOnStart == true) {showHelp();}
+drawObjective(document.getElementById("objective"), mTargetPattern, mHelpMenuWidth);  // Show mini-puzzle on help menu.
 //loadStats();   // Now done in btnTodaysPuzzle()
 
-var mStartPattern = testPattern;
+var mStartPattern = mTestPattern;
 //drawCanvas(mStartPattern);   // Replaced with below
 btnTodaysPuzzle(true);   // Always start with the daily puzzle.
 
@@ -646,24 +695,24 @@ mCanvas.addEventListener("mousedown", function(e) {
         blinkCircles();
 
         // Only update stats if we didn't already solve today's puzzle
-        const daysSinceLastWin = mIsDaily ? dateDiff(persist.LastWinDate, mTodayPuzzleDate): 0;
+        const daysSinceLastWin = mIsDaily ? dateDiff(mDataStats.LastWinDate, mTodayPuzzleDate): 0;
         if (daysSinceLastWin > 0) {
-            persist.dailyGamesWon++;
-            persist.LastWinDate = mTodayPuzzleDate;
+            mDataStats.dailyGamesWon++;
+            mDataStats.LastWinDate = mTodayPuzzleDate;
 
             // if (daysSinceLastWin == 1) {  // Now handled by btnTodaysPuzzle() which loads the stats
-                persist.currentStreak++;
+                mDataStats.currentStreak++;
             // } else {
-            //     persist.currentStreak = 1;
+            //     mDataStats.currentStreak = 1;
             // }
-            if (persist.currentStreak > persist.maxStreak) {persist.maxStreak = persist.currentStreak;}
+            if (mDataStats.currentStreak > mDataStats.maxStreak) {mDataStats.maxStreak = mDataStats.currentStreak;}
 
-            const winPct = Math.round((100 * (persist.dailyGamesWon / persist.dailyGamesPlayed)) || 0).toString() + "%";
-            document.getElementById("statsPlayed").innerText = persist.dailyGamesPlayed;
-            document.getElementById("statsSolved").innerText = persist.dailyGamesWon;
+            const winPct = Math.round((100 * (mDataStats.dailyGamesWon / mDataStats.dailyGamesPlayed)) || 0).toString() + "%";
+            document.getElementById("statsPlayed").innerText = mDataStats.dailyGamesPlayed;
+            document.getElementById("statsSolved").innerText = mDataStats.dailyGamesWon;
             document.getElementById("statsWinPct").innerText = winPct;
-            document.getElementById("statsStreak").innerText = persist.currentStreak;
-            document.getElementById("statsMaxStreak").innerText = persist.maxStreak;
+            document.getElementById("statsStreak").innerText = mDataStats.currentStreak;
+            document.getElementById("statsMaxStreak").innerText = mDataStats.maxStreak;
             
             document.getElementById("notSolved").style.display = "none";
             document.getElementById("isSolved").style.display = "inline";
@@ -700,10 +749,25 @@ document.getElementById("helpParent").addEventListener("click", function(e) {
 }, mPassiveIfSupported);
 
 
+// Main menu click event
+document.getElementById("topMenuParent").addEventListener("click", function(e) {
+    showMenu(e.target.id);
+}, mPassiveIfSupported);
+
+
 
 // helpOnStart choice change event
 document.getElementById("helpOnStart").addEventListener("change", function(e) {
-    options.helpOnStart = e.target.checked;
+    mDataOptions.helpOnStart = e.target.checked;
+    saveOptions();
+});
+
+
+
+// optDarkMode choice change event
+document.getElementById("optDarkMode").addEventListener("change", function(e) {
+    mDataOptions.darkMode = e.target.checked;
+    setDarkMode(mDataOptions.darkMode);
     saveOptions();
 });
 
@@ -810,21 +874,21 @@ function btnTodaysPuzzle(init) {
 
 
     // If never played before, show help
-    // if (persist.dailyGamesPlayed == 0  &&  init == true) {   <<< Now showing on game start based on options
+    // if (mDataStats.dailyGamesPlayed == 0  &&  init == true) {   <<< Now showing on game start based on options
     //     showHelp();
     // }
 
 
     // If not already played today, update dailyGamesPlayed stat
-    const daysSinceLastPlay = dateDiff(mTodayPuzzleDate, persist.LastPlayDate);
-    const daysSinceLastWin = dateDiff(mTodayPuzzleDate, persist.LastWinDate);
+    const daysSinceLastPlay = dateDiff(mTodayPuzzleDate, mDataStats.LastPlayDate);
+    const daysSinceLastWin = dateDiff(mTodayPuzzleDate, mDataStats.LastWinDate);
     if (daysSinceLastPlay > 0) {
-        persist.dailyGamesPlayed++;
-        persist.LastPlayDate = mTodayPuzzleDate;
+        mDataStats.dailyGamesPlayed++;
+        mDataStats.LastPlayDate = mTodayPuzzleDate;
 
         // If it's been more than a day since playing or winning, reset streak
         if (daysSinceLastWin > 1) {
-            persist.currentStreak = 0;
+            mDataStats.currentStreak = 0;
             document.getElementById("statsStreak").innerText = 0;
         }
 
@@ -868,6 +932,11 @@ function pageClick(e) {
         document.getElementById("help").style.display = "block"; 
         return;
     }
+    if (id == "optDarkMode") {
+        //topMenu element gets click before optDarkMode causing the menu to close.  So, reopen.
+        document.getElementById("topMenu").style.display = "block"; 
+        return;
+    }
     //if (id == "checkboxSlider") return;
     hideAllMenus(id);
 }
@@ -885,11 +954,19 @@ function showHelp(id) {
     if (typeof id != 'undefined') {if(id == "checkboxSlider") {return;}}    
     showHiddenElement("help")
 }
-function showMenu() {
+function showMenu(id) {
+    if (typeof id != 'undefined') {
+        //console.log(id);
+        if(["optDarkMode","optDarkModeParent"].includes(id) === true) {return;}
+    }    
+
     if (document.getElementById("topMenu").style.display != "block") {
         const emailLinkRoot = emailLinkText();
-        document.getElementById("emailBug").href = "mailto:flipit_bug@barr.rocks?subject=FlipIT%20Bug%20Report" + emailLinkRoot;
-        document.getElementById("emailFeedback").href = "mailto:flipit_feedback@barr.rocks?subject=FlipIT%20Feedback" + emailLinkRoot;
+        const xAt = "@", dom = "barr", top = "rocks", xDot = ".", xurl = "mail";
+        let dest = xurl + "to:flipit_bug" + xAt + dom + xDot + top;
+        document.getElementById("emailBug").href = dest + "?subject=FlipIT%20Bug%20Report" + emailLinkRoot;
+        dest = xurl + "to:flipit_feedback" + xAt + dom + xDot + top;
+        document.getElementById("emailFeedback").href = dest + "?subject=FlipIT%20Feedback" + emailLinkRoot;
     }
    showHiddenElement("topMenu");
 }
@@ -898,6 +975,7 @@ function showHiddenElement(elementId, forceHide) {
 	// Set forceHide = true to not show element if it is already hidden
     if (typeof forceHide === 'undefined') {forceHide = false;}
     //if (forceHide === true) console.log(elementId);
+    //console.log("showHiddenElement: " + elementId);
 
 
     var x = document.getElementById(elementId);
@@ -907,9 +985,7 @@ function showHiddenElement(elementId, forceHide) {
         x.style.display = "block";
     }
 }
-var l=false;
 function hideAllMenus(currentId) {
-//if (l===true) {alert("yes");} else {l=true}
     if (typeof currentId === 'undefined') {currentId = "";}
 
     if (mJustWon === true) {
@@ -924,27 +1000,27 @@ function hideAllMenus(currentId) {
 }
 
 
-function setDarkMode(toDark) {
-    // TODO
-    const root = document.documentElement;
+function setDarkMode(toDark, redraw) {
+    if (typeof redraw === 'undefined') {redraw = true;}  // Set to false when initially loading the puzzle
+
+    const darkModeClassName = "darkMode"
+    const classList = document.documentElement.classList;
     if (toDark===true) {
-
+        classList.add(darkModeClassName);
     } else {
-        root.style.setProperty("--clr_highlight_min", "lightcyan");
-        root.style.setProperty(" --clr_highlight_max", "darkred");
+        classList.remove(darkModeClassName);
+    }
 
-        root.style.setProperty("--clr_menu_background", "gray");
-        root.style.setProperty("--clr_menuicon_hover", "#ddd");
-        root.style.setProperty("--clr_menu_text", "white");
+    mColorBackground = getComputedStyle(mDocRoot).getPropertyValue("--clr_background");
+    mColorForground = getComputedStyle(mDocRoot).getPropertyValue("--clr_foreground");
 
-         root.style.setProperty("--clr_background", "white");
-         root.style.setProperty("--clr_disk_light", "white");
-         root.style.setProperty("--clr_disk_dark", "black");
-         root.style.setProperty("--clr_text_plain", "black");
-         root.style.setProperty("--clr_text_notsolved", "darkblue");
+    mColorDiskLight = getComputedStyle(mDocRoot).getPropertyValue("--clr_disk_light");
+    mColorDiskDark = getComputedStyle(mDocRoot).getPropertyValue("--clr_disk_dark");
+    mColorClicked = getComputedStyle(mDocRoot).getPropertyValue("--clr_disk_clicked");
 
-         root.style.setProperty("--clr_background_tooltip", "lemonchiffon");
-         root.style.setProperty("--clr_border_tooltip", "black");
+    if (redraw===true) {
+        drawCanvas(undefined, false);
+        drawObjective(document.getElementById("objective"), mTargetPattern, mHelpMenuWidth);
     }
 }
 
@@ -974,13 +1050,16 @@ function drawCanvas(pattern, initialize) {
     //document.getElementById("content").style.width = (mBorderLeft + viewWidth + mBorderRight) + "px";
     
     try {
+        const rect = mCanvas.getBoundingClientRect();
+        const top = rect.top + viewWidth - 4 + "px";
+
         let adbar = document.getElementById("bottomAdbar");
         adbar.style.width = viewWidth + "px";
-        adbar.style.top = mCanvas.top + viewWidth - 4 + "px";
+        adbar.style.top = top;
 
         adbar = document.getElementById("isblocked");
         adbar.style.width = viewWidth + "px";
-        adbar.style.top = mCanvas.top + viewWidth - 4 + "px";
+        adbar.style.top = top;
     } catch(err) {
         console.log(err.message);
     }
@@ -1002,7 +1081,8 @@ function drawCanvas(pattern, initialize) {
         initCircles(pattern);
         mCurrentPattern = pattern.slice();
     } else {
-        mCircleArray.forEach(drawCircle);
+        const params = {redraw:true};
+        mCircleArray.forEach(drawCircle, params);
     }
 }
 function drawObjective(canvas, pattern, width) {
@@ -1012,6 +1092,8 @@ function drawObjective(canvas, pattern, width) {
     // Draw a 4 x 4 grid that fills the window
     const boxWidth = width / 4;  // Width of one cell
     const context = canvas.getContext("2d");
+    context.fillStyle = mColorForground;
+    //context.strokeStyle = mColorForground;   //set in drawGrid()
     drawGrid(context, 4, 4, boxWidth);
 
     // Draw circles
@@ -1032,7 +1114,7 @@ function drawObjective(canvas, pattern, width) {
 
 function drawGrid(context, columns, rows, boxWidth,   lineWidth, color) {
 	if (typeof lineWidth === 'undefined') {lineWidth = 1;}
-	if (typeof color === 'undefined') {color = colorForground;}
+	if (typeof color === 'undefined') {color = mColorForground;}
 
 	context.beginPath();
 	context.lineWidth=lineWidth;
@@ -1084,12 +1166,17 @@ function Circle(x,y,isFilled,clicked) {
 
 
 function drawCircle(o) {
-	let isBlink = false, boxWidth = mBoxWidth, radius = mRadius, context = mContext;
+	let isBlink = false, boxWidth = mBoxWidth, radius = mRadius, context = mContext, redraw = false;
     if (typeof this != 'undefined') {
         if (typeof this.isBlink != 'undefined') {isBlink = this.isBlink;}
         if (typeof this.boxWidth != 'undefined') {boxWidth = this.boxWidth;}
         if (typeof this.radius != 'undefined') {radius = this.radius;}
         if (typeof this.context != 'undefined') {context = this.context;}
+        if (typeof this.redraw != 'undefined') {redraw = this.redraw;}
+    }
+
+    if (o.clicked === true  &&  redraw === true) {
+        clickCircle(o, true);
     }
 
     const circleX = o.boxX * boxWidth + boxWidth / 2
@@ -1103,37 +1190,40 @@ function drawCircle(o) {
     if (isBlink==true) {isFilled = 1 - isFilled;}
 
     if (isFilled === 1) {
-        context.fill();
+        context.fillStyle = mColorDiskDark;
     } else {
-        if (mInitialized===true) {
-            context.fillStyle = colorBackground;
-            context.fill();
-            context.fillStyle = colorForground;
-        }
-        context.stroke();
+        context.fillStyle = mColorDiskLight;
     }
+    context.fill();
+    context.stroke();
+
 }
 
 
-function clickCircle(o) {
+function clickCircle(o, redraw) {
     // Set or unset a highlighted background for this circle's square.
+    // Use redraw = true for window resize or skin change
     const border = 1;
 
-    if (o.clicked === true) {
-        subtractMove();
-        o.clicked = false;
-        mContext.fillStyle = colorBackground;
+    if (redraw === true) {
+        mContext.fillStyle = mColorClicked;
     } else {
-        addMove();
-        o.clicked = true;
-        mContext.fillStyle = colorClicked;
+        if (o.clicked === true) {
+            subtractMove();
+            o.clicked = false;
+            mContext.fillStyle = mColorBackground;
+        } else {
+            addMove();
+            o.clicked = true;
+            mContext.fillStyle = mColorClicked;
+        }
     }
 
     const boxX = o.boxX * mBoxWidth + border;
     const boxY = o.boxY * mBoxWidth + border;
     const width = mBoxWidth - border - 1;
     mContext.fillRect(boxX, boxY, width, width);
-    mContext.fillStyle = colorForground;
+    mContext.fillStyle = mColorForground;
 }
 
 
@@ -1391,35 +1481,39 @@ function loadStats() {
     // this function is called when the daily puzzle is loaded.  Further processing
     // is done by the loader since it has more information.
 
-    //var data = window.localStorage.getItem(persistName) || JSON.stringify(persist);
-    var data = window.localStorage.getItem(persistName);
+    //var data = window.localStorage.getItem(mDataStatsName) || JSON.stringify(mDataStats);
+    var data = window.localStorage.getItem(mDataStatsName);
     if (data) {
-        persist = JSON.parse(data);
+        mDataStats = JSON.parse(data);
     }
     //localStorage.clear();
 
-    const winPct = Math.round((100 * (persist.dailyGamesWon / persist.dailyGamesPlayed)) || 0).toString() + "%";
-    document.getElementById("statsPlayed").innerText = persist.dailyGamesPlayed;
-    document.getElementById("statsSolved").innerText = persist.dailyGamesWon;
+    const winPct = Math.round((100 * (mDataStats.dailyGamesWon / mDataStats.dailyGamesPlayed)) || 0).toString() + "%";
+    document.getElementById("statsPlayed").innerText = mDataStats.dailyGamesPlayed;
+    document.getElementById("statsSolved").innerText = mDataStats.dailyGamesWon;
     document.getElementById("statsWinPct").innerText = winPct;
-    document.getElementById("statsStreak").innerText = persist.currentStreak;
-    document.getElementById("statsMaxStreak").innerText = persist.maxStreak;
+    document.getElementById("statsStreak").innerText = mDataStats.currentStreak;
+    document.getElementById("statsMaxStreak").innerText = mDataStats.maxStreak;
 }
 function saveStats() {
-    window.localStorage.setItem(persistName, JSON.stringify(persist));
+    window.localStorage.setItem(mDataStatsName, JSON.stringify(mDataStats));
 }
 
 
 function loadOptions() {
-    var data = window.localStorage.getItem(optionsName);
+    var data = window.localStorage.getItem(mDataOptionsName);
     if (data) {
-        options = JSON.parse(data);
-        if (typeof options.darkMode === 'undefined') {options.darkMode = false;}
+        mDataOptions = JSON.parse(data);
+        if (typeof mDataOptions.darkMode === 'undefined') {mDataOptions.darkMode = false;}
     }
 
+    document.getElementById("helpOnStart").checked = mDataOptions.helpOnStart;
+    document.getElementById("optDarkMode").checked = mDataOptions.darkMode;
+    setDarkMode(mDataOptions.darkMode, false);
+    if (mDataOptions.helpOnStart == true) {showHelp();}
 }
 function saveOptions() {
-    window.localStorage.setItem(optionsName, JSON.stringify(options));
+    window.localStorage.setItem(mDataOptionsName, JSON.stringify(mDataOptions));
 }
 
 
@@ -1441,23 +1535,20 @@ function getTimeZone() {
 function emailLinkText() {
     const space = "%20";
     const crlf = "%0D%0A", lf = "%0A";
-    const colon = "%3A";
-    const amp = "&";   //&amp;
+    const colon = "%3A", eq = "%3D", amp = "&";   //&amp;
  
-    const root = document.documentElement;
-
-    return amp + "body=" + crlf + crlf + crlf + "===" + lf + "Device" + colon + lf
+    return amp + "body=" + crlf + crlf + crlf + eq + eq + eq + lf + "Device" + colon + lf
          + "Platform" + colon + space + navigator.platform + lf
          + "Language" + colon + space + navigator.language + lf
          + "Browser" + colon + space + getBrowserName() + lf
          + "Screen Resolution" + colon + space + window.screen.width + " x " + window.screen.height + lf
          + "Native Resolution" + colon + space + (window.screen.width * window.devicePixelRatio) + " x " + (window.screen.height * window.devicePixelRatio) + lf
          + "Viewport" + colon + space + document.documentElement.scrollWidth + " x " + document.documentElement.scrollHeight + lf
-         + "Version" + colon + space + getComputedStyle(root).getPropertyValue("--app_version") + lf
+         + "Version" + colon + space + getComputedStyle(mDocRoot).getPropertyValue("--app_version") + lf
          + "Timezone" + colon + space + getTimeZone() + lf
          + "Puzzle" + space + "#" + colon + space + minpPuzzleNo.value + lf
-         + "Options" + colon + space + options.helpOnStart + "," + options.darkMode + lf
-         + "Other" + colon + space + persist.currentStreak + "," + persist.maxStreak + "," + persist.dailyGamesPlayed + "," + persist.dailyGamesWon + "," + persist.LastWinDate + "," + persist.LastPlayDate + lf;
+         + "Options" + colon + space + mDataOptions.helpOnStart + "," + mDataOptions.darkMode + lf
+         + "Other" + colon + space + mDataStats.currentStreak + "," + mDataStats.maxStreak + "," + mDataStats.dailyGamesPlayed + "," + mDataStats.dailyGamesWon + "," + mDataStats.LastWinDate + "," + mDataStats.LastPlayDate + lf;
 }
 
 
