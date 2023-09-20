@@ -29,6 +29,28 @@
 <!-- End Google Tag Manager (noscript) -->
 
 <style>
+    :root {
+        --clr_highlight_min: lightcyan;
+        --clr_highlight_max: darkred;
+
+        --clr_menu_background: gray;
+        --clr_menuicon_hover: #ddd;
+        --clr_menu_text: white;
+
+        --clr_background: white;
+        --clr_disk_light: white;
+        --clr_disk_dark: black;
+        --clr_text_plain: black;
+        --clr_text_notsolved: darkblue;
+
+        --clr_background_tooltip: lemonchiffon;
+        --clr_border_tooltip: black;
+
+        --standard_space: 10px;
+        --button_width: 100px;
+        --input_width_match_button: calc(var(--button_width) - 6px);
+    }
+
     body {
         margin-top:0px;
         margin-left:0px;
@@ -41,13 +63,13 @@
     #canvas-puzzle {
         border:0px solid; 
         position:relative; 
-        left:10px; 
+        left:var(--standard_space); 
         top:50px;
     }
     #objective {
-        margin-top:10px;
+        margin-top:var(--standard_space);
         padding:5px;
-        background-color:white;
+        background-color:var(--clr_background);
     }
     input[type="checkbox"] {
         width:18px;
@@ -60,15 +82,15 @@
         top:3.1em;
         left:4em;
         min-width:177px;
-        background-color:lemonchiffon;
-        color:black;
+        background-color:var(--clr_background_tooltip);
+        color:var(--clr_text_plain);
         font-size:14px;
         font-weight:normal;
         text-align:center;
         vertical-align:middle;
         padding:0.2em .6em;
         border-radius:5px;
-        border:1px solid black;
+        border:1px solid var(--clr_border_tooltip);
         z-index:9999;
     }
     .tip-trigger:hover + [role=tooltip],
@@ -89,7 +111,7 @@
     }
     .brnodisplay {display:none;}
     .button {
-        width:100px;
+        width:var(--button_width);
     }
     .menuicon {
         position:absolute;
@@ -100,8 +122,8 @@
         font-size:17px;
     }
     .menuicon:hover {
-        background-color:#ddd;
-        color:black;
+        background-color:var(--clr_menuicon_hover);
+        color:var(--clr_text_plain);
     }
     .menuContent {
         position:absolute;
@@ -112,7 +134,7 @@
         overflow-y:auto;
         max-height:93vh;
         z-index:100;
-        background:gray;
+        background:var(--clr_menu_background);
     }
     .menuContent h1, .menuContent h1 span {
         font-size:22px;
@@ -122,11 +144,11 @@
     }
     .menuLabel {font-weight:bold;}
     .menuLabel:after {content:':'}
-    .menuContent table {padding:10px;}
-    .menuContent td {padding:10px;}
+    .menuContent table {padding:var(--standard_space);}
+    .menuContent td {padding:var(--standard_space);}
     .menuData {
         font-weight:normal;
-        color:lightcyan;
+        color:var(--clr_highlight_min);
     }
     .menuItem {
         width:100%;
@@ -140,7 +162,7 @@
 
     
     .menuText {
-        color:white;
+        color:var(--clr_menu_text);
     }
     .menuAnimateInit {
         display:block !important;
@@ -166,11 +188,11 @@
         /* vertical-align: bottom; */
         font-weight:normal;
         font-size: smaller;
-        color:black;
+        color:var(--clr_text_plain);
     }
     .checkboxSlider input[type="checkbox"] {
         background-image: -webkit-linear-gradient(hsla(0,0%,0%,.1), hsla(0,0%,100%,.1)),
-                        -webkit-linear-gradient(left, lightgrey 50%, lightcyan 50%);
+                        -webkit-linear-gradient(left, lightgrey 50%, var(--clr_highlight_min) 50%);
         background-size: 100% 100%, 200% 100%;
         background-position: 0 0, 15px 0;
         border-radius: 25px;
@@ -242,7 +264,7 @@
                 left: 0;
                 right: 0;
                 height: 2px;
-                background: white;
+                background: var(--clr_menu_text);
                 border-radius: 4px;
             }
 
@@ -254,13 +276,13 @@
         &:hover,
         &:focus {
             transform: rotateZ(90deg);
-            background: gray;
+            background: var(--clr_menu_background);
         }
     }
 
 
     #help {
-        width:260px;
+        width:330px; /* was 260 */
         padding-left:20px;
         padding-right:20px;
         overflow-x:hidden;
@@ -271,8 +293,8 @@
         animation-duration: 2s;
     }
     @keyframes animSolveMsg {
-        from {color:darkred; transform: rotateY(0deg);}
-        to {color:lightcyan; transform: rotateY(-360deg);}
+        from {color:var(--clr_highlight_max); transform: rotateY(0deg);}
+        to {color:var(--clr_highlight_min); transform: rotateY(-360deg);}
     }
     .flipit {
         animation-name:animFlipit;
@@ -280,14 +302,16 @@
         animation-iteration-count:infinite;
     }
     @keyframes animFlipit {
-        0% {color:white; transform: rotateX(0deg);}
-        90% {color:white; transform: rotateX(0deg);}
-        95% {color:black; transform: rotateX(180deg);}
-        100% {color:white; transform: rotateX(360deg);}
+        0% {color:var(--clr_disk_light); transform: rotateX(0deg);}
+        88% {color:var(--clr_disk_light); transform: rotateX(0deg);}
+        91% {color:var(--clr_disk_dark); transform: rotateX(90deg);}
+        94% {color:var(--clr_disk_dark); transform: rotateX(180deg);}
+        97% {color:var(--clr_disk_dark); transform: rotateX(270deg);}
+        100% {color:var(--clr_disk_light); transform: rotateX(360deg);}
     }
     #notSolved {
         display:inline;
-        color:darkblue;
+        color:var(--clr_text_notsolved);
         font-weight:bold;
     }
     .targetImage {
@@ -316,15 +340,15 @@
         vertical-align:middle;
         font-weight:bold;
         font-size:18px;
-        color:darkred;
+        color:var(--clr_highlight_max);
     }
     .bottomAdbar {
         position:absolute;
         bottom:0;
-        left:10px;
+        left:var(--standard_space);
         width:100%;
         height:100px;
-        padding-top:10px;
+        padding-top:var(--standard_space);
     }
     .adsbygoogle, #aswift_1_host, #aswift_1 {height:100px !important;}
     .noLandscape {
@@ -335,7 +359,7 @@
         left: 0;
         right: 0;
         padding-top:100px;
-        background-color:white;
+        background-color:var(--clr_background);
         text-align: center;
         z-index:2147483647;
     }
@@ -358,8 +382,8 @@
         .menuItem {height:25px;}
         #help {
             width:330px;
-            padding-left:10px;
-            padding-right:10px
+            padding-left:var(--standard_space);
+            padding-right:var(--standard_space)
         }
         .menuTopper {margin-left:-20px;}
         .targetImage {
@@ -369,17 +393,18 @@
     @media only screen and (max-width: 528px), only screen and (max-height: 698px) {
         .brnodisplay {display:block;}
         .puzzledate {
-            left:10px;
+            left:var(--standard_space);
             top:79px;
             font-weight:normal;
         }
         .lblPuzzleNo {
-            left:10px;
+            left:var(--standard_space);
             top:25px;
         }
         #puzzleNo{
-            left:18px;
+            left:19px;
             top:25px;
+            width:var(--input_width_match_button);
         }
     }
     @media only screen and (max-width: 400px), only screen and (max-height: 572px) {
@@ -396,7 +421,7 @@
     </p>
 </div>
 <div id="content" style="position:absolute; top:0px; left:0px;">
-    <label class="statusLine" style="left:10px;">Moves: </label><span id="moves" class="statusLine" style="left:10px;"></span>
+    <label class="statusLine" style="left:var(--standard_space);">Moves: </label><span id="moves" class="statusLine" style="left:var(--standard_space);"></span>
     <button id="reset" class="statusLine button">Reset</button>
     <button id="undo" class="statusLine button" disabled="disabled">Undo Last</button>
 
@@ -443,7 +468,7 @@
             </button>
               
             <h1 class="flipit">FlipIt</h1>
-            <p style="color:lightcyan; font-weight:bold; text-align:center; margin-top:-6px;">Solve in 3 moves</p>
+            <p style="color:var(--clr_highlight_min); font-weight:bold; text-align:center; margin-top:-6px;">Solve in 3 moves</p>
             <p>The objective is to get the puzzle to look like this:<br/>
             <canvas id="objective" class="targetImage">Your browser does not support the HTML5 canvas tag.</canvas>
             </p>
@@ -456,9 +481,9 @@
                and unlimited random puzzles.  You can also select a puzzle by its number.  This allows
                you to solve the same puzzle as your friends.
             </p>
-            <p style="color:lightcyan;">For the puzzle published in the August 2023 Mensa Bulletin, enter puzzle #48449.
+            <p style="color:var(--clr_highlight_min);">For the puzzle published in the August 2023 Mensa Bulletin, enter puzzle #48449.
             </p>
-            <p style="color:black; text-align:center; font-size:15px;">Another fine HaxWare product<br/>
+            <p style="color:var(--clr_text_plain); text-align:center; font-size:15px;">Another fine HaxWare product<br/>
                By Evan A. Barr<br/>flipit at barr.rocks
             </p>
         </div>
@@ -507,14 +532,21 @@ preventAdSenseHeightChange("bottomAdbar");
 
 
 // Globals
-const mBorderLeft = 10, mBorderRight=10, mBorderTop = 80, mBorderBottom = 110;  // left and top must match the actual position for canvas element from html above.
-const helpMenuWidth = 190;  // The width available to the "target" image displayed in the help menu.
-const mMinWidth = 287;  // Canvas minimum width to prevent toolbar from getting messy.
 const testPattern = [1,0,0,0,0,0,1,0,1,0,1,1,1,1,0,1];
 const mTargetPattern = [1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1];
 const mTargetPuzzleNo = patternToNumber(mTargetPattern);
 
-const colorBackground = "white", colorForground = "black", colorClicked = "lightcyan";  //greenyellow
+const root = document.documentElement;
+const mBorderLeft = parseInt(getComputedStyle(root).getPropertyValue("--standard_space"));
+const mBorderRight = mBorderLeft, 
+      mBorderTop = 80, 
+      mBorderBottom = 110;  // left and top must match the actual position for canvas element from html above.
+const helpMenuWidth = 190;  // The width available to the "target" image displayed in the help menu.
+const mMinWidth = 287;  // Canvas minimum width to prevent toolbar from getting messy.
+
+const colorBackground = getComputedStyle(root).getPropertyValue("--clr_background"), 
+      colorForground = getComputedStyle(root).getPropertyValue("--clr_text_plain"), 
+      colorClicked = getComputedStyle(root).getPropertyValue("--clr_highlight_min");
 
 const neverPlayed = "1900-01-01";
 var mTodayDateText = "", mTodayPuzzleDate = neverPlayed, mIsDaily = false, mJustWon = false;
@@ -701,7 +733,7 @@ document.getElementById("stats").addEventListener("transitionend", function(e) {
 function statsAnimate() {
     const eMsg = document.getElementById("solveMsg");
     eMsg.style.animationDelay = "1s";
-    eMsg.style.color = "darkred";
+    eMsg.style.color = element.style.getPropertyValue("--clr_highlight_max");
 
     const eStats = document.getElementById("stats");
     eStats.classList.add("menuAnimateInit");
