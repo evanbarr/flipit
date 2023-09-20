@@ -30,6 +30,8 @@
 
 <style>
     :root {
+        --app_version: 1.09.004;
+
         --clr_highlight_min: lightcyan;
         --clr_highlight_max: darkred;
 
@@ -51,6 +53,7 @@
         --input_width_match_button: calc(var(--button_width) - 6px);
     }
 
+    html {height:100%;}
     body {
         margin-top:0px;
         margin-left:0px;
@@ -563,7 +566,8 @@ var persist = {
 
 const optionsName = "eb-flipit-options";
 var options = {
-    helpOnStart: true
+    helpOnStart: true,
+    darkMode: false
 }
 
 
@@ -593,6 +597,7 @@ mCanvas.top = mBorderTop;
 drawObjective(document.getElementById("objective"), mTargetPattern, helpMenuWidth);  // Show mini-puzzle on help menu.
 loadOptions();
 document.getElementById("helpOnStart").checked = options.helpOnStart;
+if (options.darkMode == true) {setDarkMode(true);}
 if (options.helpOnStart == true) {showHelp();}
 //loadStats();   // Now done in btnTodaysPuzzle()
 
@@ -733,7 +738,7 @@ document.getElementById("stats").addEventListener("transitionend", function(e) {
 function statsAnimate() {
     const eMsg = document.getElementById("solveMsg");
     eMsg.style.animationDelay = "1s";
-    eMsg.style.color = element.style.getPropertyValue("--clr_highlight_max");
+    eMsg.style.color = getComputedStyle(document.documentElement).getPropertyValue("--clr_highlight_max");
 
     const eStats = document.getElementById("stats");
     eStats.classList.add("menuAnimateInit");
@@ -903,6 +908,31 @@ function hideAllMenus(currentId) {
     if (currentId != "topMenu") showHiddenElement("topMenu", true);
     if (currentId != "help") showHiddenElement("help", true);
     if (currentId != "stats") showHiddenElement("stats", true);
+}
+
+
+function setDarkMode(toDark) {
+    // TODO
+    const root = document.documentElement;
+    if (toDark===true) {
+
+    } else {
+        root.style.setProperty("--clr_highlight_min", "lightcyan");
+        root.style.setProperty(" --clr_highlight_max", "darkred");
+
+        root.style.setProperty("--clr_menu_background", "gray");
+        root.style.setProperty("--clr_menuicon_hover", "#ddd");
+        root.style.setProperty("--clr_menu_text", "white");
+
+         root.style.setProperty("--clr_background", "white");
+         root.style.setProperty("--clr_disk_light", "white");
+         root.style.setProperty("--clr_disk_dark", "black");
+         root.style.setProperty("--clr_text_plain", "black");
+         root.style.setProperty("--clr_text_notsolved", "darkblue");
+
+         root.style.setProperty("--clr_background_tooltip", "lemonchiffon");
+         root.style.setProperty("--clr_border_tooltip", "black");
+    }
 }
 
 
@@ -1377,6 +1407,9 @@ function loadOptions() {
 function saveOptions() {
     window.localStorage.setItem(optionsName, JSON.stringify(options));
 }
+
+
+
 
 
 // ------------------------
