@@ -30,7 +30,7 @@
 
 <style>
     :root {
-        --app_version: 1.09.004;
+        --app_version: 1.09.005;
 
         --clr_highlight_min: lightcyan;
         --clr_highlight_max: darkred;
@@ -161,6 +161,10 @@
     .menuButton {
         height:30px;
         font-size:1em;
+    }
+    .menuLink {
+        display: inline-block;
+        text-align:center;
     }
 
     
@@ -493,18 +497,20 @@
     </a>
     
     <!-- "Hamburger menu" / "Bar icon" to toggle the navigation links -->
-    <a id="topMenuParent" class="menuicon" onclick="showMenu()">
+    <div id="topMenuParent" class="menuicon" onclick="showMenu()">
         <i id="topMenuParent" class="fa fa-bars"></i>
         <div id="topMenu" class="menuContent">
             <button id="target" class="menuItem menuButton" onclick="btnTarget()">Show Target</button>
             <button id="random" class="menuItem menuButton" onclick="btnRandom()">Random Puzzle</button>
             <button id="todays" class="menuItem menuButton" onclick="btnTodaysPuzzle()">Today's Puzzle</button>        
 
-            <!-- <hr/>
-            <input type="checkbox" id="diagonals" class="menuItem" checked>
+            <hr/>
+            <a id="emailFeedback" class="menuItem menuLink" href="" target="_blank">Send Feedback</a>
+            <a id="emailBug" class="menuItem menuLink" href="" target="_blank">Report a Bug</a>
+            <!-- <input type="checkbox" id="diagonals" class="menuItem" checked>
             <label for="diagonals" class="menuItem menuText">Include Diagonals</label> -->
         </div>
-    </a>
+    </div>
     
     <br/>
     <canvas id="canvas-puzzle">This is where the flipit puzzle would have been displayed.  However, your browser does not support the HTML5 canvas tag or javascript is disabled.</canvas>     
@@ -879,7 +885,14 @@ function showHelp(id) {
     if (typeof id != 'undefined') {if(id == "checkboxSlider") {return;}}    
     showHiddenElement("help")
 }
-function showMenu() {showHiddenElement("topMenu");}
+function showMenu() {
+    if (document.getElementById("topMenu").style.display != "block") {
+        const emailLinkRoot = emailLinkText();
+        document.getElementById("emailBug").href = "mailto:flipit_bug@barr.rocks?subject=FlipIT%20Bug%20Report" + emailLinkRoot;
+        document.getElementById("emailFeedback").href = "mailto:flipit_feedback@barr.rocks?subject=FlipIT%20Feedback" + emailLinkRoot;
+    }
+   showHiddenElement("topMenu");
+}
 function showStats() {showHiddenElement("stats")}
 function showHiddenElement(elementId, forceHide) {
 	// Set forceHide = true to not show element if it is already hidden
@@ -1401,6 +1414,7 @@ function loadOptions() {
     var data = window.localStorage.getItem(optionsName);
     if (data) {
         options = JSON.parse(data);
+        if (typeof options.darkMode === 'undefined') {options.darkMode = false;}
     }
 
 }
@@ -1409,6 +1423,42 @@ function saveOptions() {
 }
 
 
+function getBrowserName() {
+    if (!navigator)
+        return "";
+    var a, b, c = navigator.userAgent || "", d = navigator.appName || "";
+    return (b = c.indexOf("Opera")) != -1 || (b = c.indexOf("OPR/")) != -1 ? d = "Opera" : (b = c.indexOf("Android")) != -1 ? d = "Android" : (b = c.indexOf("Chrome")) != -1 ? d = "Chrome" : (b = c.indexOf("Safari")) != -1 ? d = "Safari" : (b = c.indexOf("Firefox")) != -1 ? d = "Firefox" : (b = c.indexOf("IEMobile")) != -1 ? d = "Internet Explorer Mobile" : "Microsoft Internet Explorer" == d || "Netscape" == d ? d = "Internet Explorer" : (a = c.lastIndexOf(" ") + 1) < (b = c.lastIndexOf("/")) ? (d = c.substring(a, b),
+    d.toLowerCase() == d.toUpperCase() && (d = navigator.appName)) : d = "unknown", d
+}
+
+function getTimeZone() {
+    const d = new Date();
+    const diff = d.getTimezoneOffset() / 60;
+    const direction = (diff>0) ? "-":"+";
+    return "UTC" + direction + Math.abs(diff);
+}
+
+function emailLinkText() {
+    const space = "%20";
+    const crlf = "%0D%0A", lf = "%0A";
+    const colon = "%3A";
+    const amp = "&";   //&amp;
+ 
+    const root = document.documentElement;
+
+    return amp + "body=" + crlf + crlf + crlf + "===" + lf + "Device" + colon + lf
+         + "Platform" + colon + space + navigator.platform + lf
+         + "Language" + colon + space + navigator.language + lf
+         + "Browser" + colon + space + getBrowserName() + lf
+         + "Screen Resolution" + colon + space + window.screen.width + " x " + window.screen.height + lf
+         + "Native Resolution" + colon + space + (window.screen.width * window.devicePixelRatio) + " x " + (window.screen.height * window.devicePixelRatio) + lf
+         + "Viewport" + colon + space + document.documentElement.scrollWidth + " x " + document.documentElement.scrollHeight + lf
+         + "Version" + colon + space + getComputedStyle(root).getPropertyValue("--app_version") + lf
+         + "Timezone" + colon + space + getTimeZone() + lf
+         + "Puzzle" + space + "#" + colon + space + minpPuzzleNo.value + lf
+         + "Options" + colon + space + options.helpOnStart + "," + options.darkMode + lf
+         + "Other" + colon + space + persist.currentStreak + "," + persist.maxStreak + "," + persist.dailyGamesPlayed + "," + persist.dailyGamesWon + "," + persist.LastWinDate + "," + persist.LastPlayDate + lf;
+}
 
 
 
