@@ -30,7 +30,7 @@
 
 <style>
     :root {
-        --app_version: "1.09.007";
+        --app_version: "1.09.008";
 
         --clr_highlight_min: lightcyan;
         --clr_highlight_max: darkred;
@@ -350,6 +350,23 @@
         from {color:var(--clr_highlight_max); transform: rotateY(0deg);}
         to {color:var(--clr_highlight_min); transform: rotateY(-360deg);}
     }
+    .tomorrowMsg{
+        visibility:hidden;
+        padding-top:0 !important;
+        padding-bottom:0 !important;
+        padding-right:0;
+        position:relative;
+        top:-11px;
+        font-size:.9em;
+        white-space:nowrap;
+        animation-name:animTomorrow;
+        animation-duration:2.6s;
+        animation-fill-mode:forwards;
+    }
+    @keyframes animTomorrow {
+        99% {visibility: hidden;}
+        100% {visibility: visible;}
+    }
     .flipit {
         animation-name:animFlipit;
         animation-duration:5s;
@@ -391,7 +408,7 @@
         /* overflow:hidden; */
         user-select:none; 
     }
-    #isSolved {
+    .isSolved {
         vertical-align:middle;
         font-weight:bold;
         font-size:18px;
@@ -465,6 +482,7 @@
     @media only screen and (max-width: 400px), only screen and (max-height: 572px) {
         #help {width:unset;}
         #stats {width:unset !important;}
+        #topMenu {width:200px;}
     }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -488,7 +506,7 @@
     </span>
 
     <span class="puzzledate">
-        <span id="puzzledate"></span><span id="isSolved" class="tip-trigger" aria-describedby="tip-puzzlesolved"> *</span>
+        <span id="puzzledate"></span><span id="isSolved" class="tip-trigger isSolved" aria-describedby="tip-puzzlesolved"> *</span>
         <div id="tip-puzzlesolved" role="tooltip">You have solved this puzzle!</div>
     </span>
 
@@ -505,6 +523,7 @@
                 <tr><td class="menuLabel">Current Streak</td><td class="menuData" id="statsStreak">0</td></tr>
                 <tr><td class="menuLabel">Max Streak</td>    <td class="menuData" id="statsMaxStreak">0</td></tr>
                 <tr><td class="menuData solveMsg" id="solveMsg" colspan="2">You have <span id="notSolved">not </span>solved today's puzzle!</td></tr>
+                <tr id="isSolved_tr"><td class="tomorrowMsg" colspan="2">Come back tomorrow for a new puzzle</td></tr>
             </table>
         </div>
     </a>
@@ -716,6 +735,8 @@ mCanvas.addEventListener("mousedown", function(e) {
             
             document.getElementById("notSolved").style.display = "none";
             document.getElementById("isSolved").style.display = "inline";
+            //document.querySelectorAll("#isSolved").forEach( (e) => {e.style.display = "inline";} );
+            document.getElementById("isSolved_tr").style.display = "table-row";
 
             saveStats();
         }
@@ -894,11 +915,15 @@ function btnTodaysPuzzle(init) {
 
         document.getElementById("notSolved").style.display = "inline";
         document.getElementById("isSolved").style.display = "none";
+        //document.querySelectorAll("#isSolved").forEach( (e) => {e.style.display = "none";} );
+        document.getElementById("isSolved_tr").style.display = "none";
 
         saveStats();
     } else if (daysSinceLastWin == 0) {
         document.getElementById("notSolved").style.display = "none";
         document.getElementById("isSolved").style.display = "inline";
+        //document.querySelectorAll("#isSolved").forEach( (e) => {e.style.display = "inline";} );
+        document.getElementById("isSolved_tr").style.display = "table-row";
     }
 }
 
@@ -1259,6 +1284,8 @@ function resetCircles(pattern, redrawToday) {
     if (redrawToday === false) {
         document.getElementById("puzzledate").innerText = "";
         document.getElementById("isSolved").style.display = "none";
+        //document.querySelectorAll("#isSolved").forEach( (e) => {e.style.display = "none";} );
+        document.getElementById("isSolved_tr").style.display = "none";
         mIsDaily = false;
     }
 
