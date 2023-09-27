@@ -30,7 +30,7 @@
 
 <style>
     :root {
-        --app_version: "1.09.008";
+        --app_version: "1.09.009";
 
         --clr_highlight_min: lightcyan;
         --clr_highlight_max: darkred;
@@ -257,7 +257,9 @@
         height: 19px;
         padding-right: 25px;
         width: 61px;
+        appearance: none;
         -webkit-appearance: none;
+        transition: .25s;
         -webkit-transition: .25s;
     }
     .checkboxSlider input[type="checkbox"]::after {
@@ -461,6 +463,8 @@
         .targetImage {
             padding-left:45px;  /*  (help,width - 190 - 20) / 2    */
         }
+        #optDarkMode {margin-right:25px;}
+        .tomorrowMsg{font-size:.8em;}
     }
     @media only screen and (max-width: 528px), only screen and (max-height: 698px) {
         .brnodisplay {display:block;}
