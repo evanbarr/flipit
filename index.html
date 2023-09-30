@@ -30,7 +30,7 @@
 
 <style>
     :root {
-        --app_version: "1.09.009";
+        --app_version: "1.09.010";
 
         --clr_highlight_min: lightcyan;
         --clr_highlight_max: darkred;
@@ -55,9 +55,9 @@
         --input_width_match_button: calc(var(--button_width) - 6px);
     }
     .darkMode {
-        --clr_background: black;
+        --clr_background: rgb(48, 48, 48);
         --clr_foreground: white;
-        --clr_disk_clicked: darkcyan;
+        --clr_disk_clicked: rgb(43, 48, 80);
 
         /* Unchanged
         --clr_highlight_min: lightcyan;
@@ -142,6 +142,40 @@
         left:20px;
         font-size:18px;
     }
+
+    .lblMoves {
+        left:var(--standard_space);
+        width:60px;
+        display:inline-block;
+        overflow-y:clip;
+        transition:height 1s;
+    }
+    .moves {
+        left:74px;
+        display:inline-block;
+        overflow-y:clip;
+        transition:height 1s;
+    }
+    .lblMovesShow {
+        height:20px;
+    }
+    .lblMovesHide {
+        height:0px;
+    }
+
+    .lblClicks {
+        position:absolute;
+        transition:height 1s, top 1s;
+    }
+    .lblClicksShow {
+        top:23px;
+        height:20px;
+    }
+    .lblClicksHide {
+        top:40px;
+        height:0px;
+    }
+
     .brnodisplay {display:none;}
     .button {
         width:var(--button_width);
@@ -201,6 +235,7 @@
     .menuText {
         color:var(--clr_menu_text);
     }
+    .menuText_opt {font-weight: normal;}
     .menuFinePrint {
         margin-right:4px;
         color:var(--clr_text_plain);
@@ -240,8 +275,7 @@
         font-size: smaller;
         color:var(--clr_text_plain);
     }
-    #optDarkMode {margin: 10px 35px 10px 5px;}
-    #optDarkModeParent {font-weight: normal;}
+    .menuOption {margin: 10px 18px 10px 5px;}
     .checkboxSlider input[type="checkbox"] {
         background-image: -webkit-linear-gradient(hsla(0,0%,0%,.1), hsla(0,0%,100%,.1)),
                         -webkit-linear-gradient(left, lightgrey 50%, var(--clr_highlight_min) 50%);
@@ -342,7 +376,7 @@
         overflow-x:hidden;
     }
     #stats {width:300px;}
-    #topMenu {width:190px;}
+    #topMenu {width:200px;}
     .solveMsg{
         padding-top:28px !important;
         animation-name: animSolveMsg;
@@ -463,7 +497,6 @@
         .targetImage {
             padding-left:45px;  /*  (help,width - 190 - 20) / 2    */
         }
-        #optDarkMode {margin-right:25px;}
         .tomorrowMsg{font-size:.8em;}
     }
     @media only screen and (max-width: 528px), only screen and (max-height: 698px) {
@@ -486,7 +519,6 @@
     @media only screen and (max-width: 400px), only screen and (max-height: 572px) {
         #help {width:unset;}
         #stats {width:unset !important;}
-        #topMenu {width:200px;}
     }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -498,7 +530,12 @@
     </p>
 </div>
 <div id="content">
-    <label class="statusLine" style="left:var(--standard_space);">Moves: </label><span id="moves" class="statusLine"></span>
+    <label id="lblMoves" class="statusLine lblMoves lblMovesShow">Moves: </label>
+    <span id="moves" class="statusLine moves lblMovesShow"></span>
+    
+    <label id="lblClicks" class="statusLine lblMoves lblClicks lblClicksHide">Clicks: </label>
+    <span id="clicks" class="statusLine moves lblClicks lblClicksHide"></span>
+    
     <button id="reset" class="statusLine button">Reset</button>
     <button id="undo" class="statusLine button" disabled="disabled">Undo Last</button>
 
@@ -514,7 +551,7 @@
         <div id="tip-puzzlesolved" role="tooltip">You have solved this puzzle!</div>
     </span>
 
-    <!-- "Stats icon" -->
+    <!-- "Stats menu" -->
     <a id="statsParent" class="menuicon" style="right:60px;" onclick="showStats()">
         <i id="statsParent" class="fa fa-line-chart"></i>
         <div id="stats" class="menuContent menuText">
@@ -532,7 +569,7 @@
         </div>
     </a>
     
-    <!-- "Help icon" -->
+    <!-- "Help menu" -->
     <a id="helpParent" class="menuicon" style="right:30px;">
         <i id="helpParent" class="fa fa-question-circle"></i>
         <div id="help" class="menuContent menuText">
@@ -567,7 +604,7 @@
         </div>
     </a>
     
-    <!-- "Hamburger menu" / "Bar icon" to toggle the navigation links -->
+    <!-- "Hamburger menu" -->
     <div id="topMenuParent" class="menuicon">
         <i id="topMenuParent" class="fa fa-bars"></i>
         <div id="topMenu" class="menuContent">
@@ -577,9 +614,15 @@
 
             <hr/>
             <div id="optDarkModeDiv" class="checkboxSlider">
-                <input type="checkbox" id="optDarkMode" class="menuItem">
-                <label for="optDarkMode" id="optDarkModeParent" class="menuItem menuText">Dark mode</label>
+                <input type="checkbox" id="optDarkMode" class="menuItem menuOption">
+                <label for="optDarkMode" id="optDarkModeParent" class="menuItem menuText menuText_opt">Dark mode</label>
             </div>
+
+            <div id="optShowClicksDiv" class="checkboxSlider">
+                <input type="checkbox" id="optShowClicks" class="menuItem menuOption">
+                <label for="optShowClicks" id="optShowClicksParent" class="menuItem menuText menuText_opt">Show "Clicks"</label>
+            </div>
+
             <hr/>
             <a id="emailFeedback" class="menuItem menuLink" href="" target="_blank">Send Feedback</a>
             <a id="emailBug" class="menuItem menuLink" href="" target="_blank">Report a Bug</a>
@@ -647,14 +690,16 @@ var mDataStats = {
 const mDataOptionsName = "eb-flipit-options";
 var mDataOptions = {
     helpOnStart: true,
-    darkMode: false
+    darkMode: false,
+    showClicks: false
 }
 
 
 var mBoxWidth = 0, mRadius = 0;
 
 const mlblMoves = document.getElementById("moves");
-var mMoves = 0, mIncludeDiagonals = true;
+const mlblClicks = document.getElementById("clicks");
+var mMoves = 0, mClicks = 0, mIncludeDiagonals = true;
 var mLastX = 0, mLastY = 0;
 
 const minpPuzzleNo = document.getElementById("puzzleNo");
@@ -798,6 +843,15 @@ document.getElementById("optDarkMode").addEventListener("change", function(e) {
 
 
 
+// optShowClicks choice change event
+document.getElementById("optShowClicks").addEventListener("change", function(e) {
+    mDataOptions.showClicks = e.target.checked;
+    showClicks(mDataOptions.showClicks);
+    saveOptions();
+});
+
+
+
 // puzzle number change event
 minpPuzzleNo.addEventListener("change", function(e) {
     const puzzleNo = e.target.value;
@@ -858,6 +912,7 @@ function Undo(undoButton) {
     //subtractMove();
     flipCircles(mLastX, mLastY, true);
     undoButton.disabled = "disabled";
+    subtractClick(2);   // Undo last should discount last click.  Must subtract one more because flipCircles() added one.
 }
 
 
@@ -961,7 +1016,9 @@ function pageClick(e) {
         document.getElementById("help").style.display = "block"; 
         return;
     }
-    if (id == "optDarkMode") {
+    const classList = evtobj.target.classList;
+    //if (id == "optDarkMode") {
+    if (classList.contains("menuOption") === true  ||  classList.contains("menuText_opt") === true) {
         //topMenu element gets click before optDarkMode causing the menu to close.  So, reopen.
         document.getElementById("topMenu").style.display = "block"; 
         return;
@@ -986,7 +1043,7 @@ function showHelp(id) {
 function showMenu(id) {
     if (typeof id != 'undefined') {
         //console.log(id);
-        if(["optDarkMode","optDarkModeParent"].includes(id) === true) {return;}
+        if(["optDarkMode","optDarkModeParent","optShowClicks","optShowClicksParent"].includes(id) === true) {return;}
     }    
 
     if (document.getElementById("topMenu").style.display != "block") {
@@ -1051,6 +1108,38 @@ function setDarkMode(toDark, redraw) {
         drawCanvas(undefined, false);
         drawObjective(document.getElementById("objective"), mTargetPattern, mHelpMenuWidth);
     }
+}
+
+
+function showClicks(show) {
+    let addMove, addClick, delMove, delClick;
+    if (show === true) {
+        delMove = "lblMovesShow";
+        delClick = "lblClicksHide";
+        addMove = "lblMovesHide";
+        addClick = "lblClicksShow";
+    } else {
+        delMove = "lblMovesHide";
+        delClick = "lblClicksShow";
+        addMove = "lblMovesShow";
+        addClick = "lblClicksHide";
+    }
+
+    let el = document.getElementById("lblMoves");    
+    el.classList.remove(delMove);
+    el.classList.add(addMove);
+
+    el = document.getElementById("moves");
+    el.classList.remove(delMove);
+    el.classList.add(addMove);
+
+    el = document.getElementById("lblClicks");
+    el.classList.remove(delClick);
+    el.classList.add(addClick);
+    
+    el = document.getElementById("clicks");
+    el.classList.remove(delClick);
+    el.classList.add(addClick);
 }
 
 
@@ -1178,10 +1267,20 @@ function getMousePosition(canvas, event) {
 function addMove() {
     mMoves++;
     mlblMoves.innerText = mMoves;
+    addClick();
+}
+function addClick() {
+    mClicks++;
+    mlblClicks.innerText = mClicks;
 }
 function subtractMove() {
     mMoves--;
     mlblMoves.innerText = mMoves;
+    addClick();   // Undoing a move is still a click, so add.
+}
+function subtractClick(n) {
+    mClicks-=n;
+    mlblClicks.innerText = mClicks;
 }
 
 
@@ -1284,6 +1383,8 @@ function resetCircles(pattern, redrawToday) {
 
     mMoves = 0;    // Must be after clickCircle()
     mlblMoves.innerText = 0;
+    mClicks = 0;
+    mlblClicks.innerText = 0;
 
     if (redrawToday === false) {
         document.getElementById("puzzledate").innerText = "";
@@ -1536,11 +1637,14 @@ function loadOptions() {
     if (data) {
         mDataOptions = JSON.parse(data);
         if (typeof mDataOptions.darkMode === 'undefined') {mDataOptions.darkMode = false;}
+        if (typeof mDataOptions.showClicks === 'undefined') {mDataOptions.showClicks = true;}
     }
 
     document.getElementById("helpOnStart").checked = mDataOptions.helpOnStart;
     document.getElementById("optDarkMode").checked = mDataOptions.darkMode;
+    document.getElementById("optShowClicks").checked = mDataOptions.showClicks;
     setDarkMode(mDataOptions.darkMode, false);
+    showClicks(mDataOptions.showClicks);
     if (mDataOptions.helpOnStart == true) {showHelp();}
 }
 function saveOptions() {
@@ -1578,7 +1682,7 @@ function emailLinkText() {
          + "Version" + colon + space + getComputedStyle(mDocRoot).getPropertyValue("--app_version") + lf
          + "Timezone" + colon + space + getTimeZone() + lf
          + "Puzzle" + space + "#" + colon + space + minpPuzzleNo.value + lf
-         + "Options" + colon + space + mDataOptions.helpOnStart + "," + mDataOptions.darkMode + lf
+         + "Options" + colon + space + mDataOptions.helpOnStart + "," + mDataOptions.darkMode + "," + mDataOptions.showClicks + lf
          + "Other" + colon + space + mDataStats.currentStreak + "," + mDataStats.maxStreak + "," + mDataStats.dailyGamesPlayed + "," + mDataStats.dailyGamesWon + "," + mDataStats.LastWinDate + "," + mDataStats.LastPlayDate + lf;
 }
 
