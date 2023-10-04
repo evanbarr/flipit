@@ -30,7 +30,7 @@
 
 <style>
     :root {
-        --app_version: "1.09.014";
+        --app_version: "1.09.015";
 
         --clr_highlight_min: lightcyan;
         --clr_highlight_max: darkred;
@@ -195,7 +195,7 @@
     .lblPuzzleNo {
         left:0;
         top:var(--statusline_text_top);
-        width:4em;
+        width:5em;
     }
     #puzzleNo{
         left:4em;
@@ -205,7 +205,7 @@
         position:absolute;
         left:332px;
         top:46px;
-        width:290px;
+        width:300px;
         line-height:20px;
         font-weight:bold;
         font-size:12px;
@@ -1176,12 +1176,29 @@ function showClicks(show) {
 // ------------------------
 // Canvas functions
 //
+function getWidth() {
+    //const availWidth = window.availWidth;
+    const innerWidth = window.innerWidth;
+    const screenWidth = screen.width;
+    if (screenWidth != null) {
+        if (innerWidth != null) {
+            return screenWidth < innerWidth ? screenWidth : innerWidth;
+        } else {
+            return screenWidth;
+        }
+    } else if (innerWidth != null) {
+        return innerWidth;
+    } else {
+        return 400;
+    }
+}
 function drawCanvas(pattern, initialize) {
     const circlePadding = .25;
     if (typeof initialize === 'undefined') {initialize = true;}
 
     // Set the canvas size to fill the entire window (minus the canvas border)
-    let viewWidth = window.innerWidth - (mBorderLeft + mBorderRight);
+    //let viewWidth = window.innerWidth - (mBorderLeft + mBorderRight);
+    let viewWidth = getWidth() - (mBorderLeft + mBorderRight);
     let viewHeight = window.innerHeight - (mBorderTop + mBorderBottom);
 
 
