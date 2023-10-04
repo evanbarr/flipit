@@ -30,7 +30,7 @@
 
 <style>
     :root {
-        --app_version: "1.09.013";
+        --app_version: "1.09.014";
 
         --clr_highlight_min: lightcyan;
         --clr_highlight_max: darkred;
@@ -52,7 +52,8 @@
 
         --standard_space: 10px;
         --button_width: 100px;
-        --input_width_match_button: calc(var(--button_width) - 7px);
+        --input_width_match_button: calc(var(--button_width) - 6px);
+        --statusline_text_top: 24px;
     }
     .darkMode {
         --clr_background: rgb(48, 48, 48);
@@ -92,9 +93,9 @@
     #content {position:absolute; top:0px; left:0px;}
     #canvas-puzzle {
         border:0px solid; 
-        position:relative; 
+        position:absolute; 
         left:var(--standard_space); 
-        top:50px;
+        top:76px;
     }
     #objective {
         margin-top:var(--standard_space);
@@ -109,8 +110,8 @@
     [role=tooltip] {
         display:none;
         position:absolute;
-        top:3.1em;
-        left:4em;
+        top:3.45em;
+        left:1em;
         min-width:177px;
         background-color:var(--clr_background_tooltip);
         color:var(--clr_text_plain);
@@ -127,7 +128,6 @@
     .tip-trigger:focus + [role=tooltip] {
         display:inline;
     }
-    .tip-wrapper {position:relative;}
     #tip-puzzlesolved {
         top:1.3em;
         left:5em;
@@ -137,22 +137,23 @@
     }
 
     .statusLine {
-        position:relative;
+        display:inline-block;
+        position:absolute;
         top:20px;
-        left:20px;
+        padding:1px;
         font-size:18px;
     }
 
     .lblMoves {
         left:var(--standard_space);
+        top:var(--statusline_text_top);
         width:60px;
-        display:inline-block;
         overflow-y:clip;
         transition:height 1s;
     }
     .moves {
         left:74px;
-        display:inline-block;
+        top:var(--statusline_text_top);
         overflow-y:clip;
         transition:height 1s;
     }
@@ -164,11 +165,9 @@
     }
 
     .lblClicks {
-        position:absolute;
         transition:height 1s, top 1s;
     }
     .lblClicksShow {
-        top:23px;
         height:20px;
     }
     .lblClicksHide {
@@ -180,10 +179,52 @@
     .button {
         width:var(--button_width);
     }
+    .button:hover:enabled {background-color:var(--clr_menuicon_hover);}
+
+
+    #reset {
+        left:97px;
+    }
+    #undo {
+        left:201px;
+    }
+    .puzzleNo {
+        position:absolute;
+        left:332px;
+    }
+    .lblPuzzleNo {
+        left:0;
+        top:var(--statusline_text_top);
+        width:4em;
+    }
+    #puzzleNo{
+        left:4em;
+        width:var(--input_width_match_button);
+    }
+    .puzzleDate {
+        position:absolute;
+        left:332px;
+        top:46px;
+        width:290px;
+        line-height:20px;
+        font-weight:bold;
+        font-size:12px;
+        /* overflow:hidden; */
+        user-select:none; 
+    }
+    .isSolved {
+        vertical-align:middle;
+        font-weight:bold;
+        font-size:18px;
+        color:var(--clr_highlight_max);
+    }
+
+
+
     .menuicon {
         position:absolute;
         display:block;
-        right:0px;
+        right:10px;
         top:20px;
         padding:5px;
         font-size:17px;
@@ -426,30 +467,6 @@
         height:190px;
         margin-left:20px;  /*  (help,width - 190 - 20) / 2    */
     }
-    #moves {left:var(--standard_space);}
-    .lblPuzzleNo {
-        left:50px;
-    }
-    #puzzleNo{
-        left:50px;
-        width:80px;
-    }
-    .puzzledate {
-        position:absolute;
-        left:332px;
-        top:47px;
-        line-height:20px;
-        font-weight:bold;
-        font-size:12px;
-        /* overflow:hidden; */
-        user-select:none; 
-    }
-    .isSolved {
-        vertical-align:middle;
-        font-weight:bold;
-        font-size:18px;
-        color:var(--clr_highlight_max);
-    }
     .bottomAdbar {
         position:absolute;
         bottom:0;
@@ -471,6 +488,8 @@
         text-align: center;
         z-index:2147483647;
     }
+
+    /* @media ----------------------------------------*/
     @media only screen and (max-height: 360px) and (orientation:landscape) {
         .noLandscape {display:block;}
     }
@@ -479,10 +498,13 @@
         #undo {
             display:none;
         }
-        .puzzledate {
+        .puzzleDate {
             left:227px;
             font-size:16px;
             font-weight:normal;
+        }
+        .puzzleNo {
+            left:232px;
         }
         .menuContent {
             max-height:85vh;
@@ -490,7 +512,7 @@
         .menuItem {height:25px;}
         #help {
             width:330px;
-            padding-left:var(--standard_space);
+            padding-left:var(--standard_space);5
             padding-right:var(--standard_space)
         }
         #stats {
@@ -501,25 +523,26 @@
         }
         .menuTopper {margin-left:-20px;}
         .targetImage {
-            padding-left:45px;  /*  (help,width - 190 - 20) / 2    */
+            padding-left:45px;  /*  (help.width - 190 - 20) / 2    */
         }
         .tomorrowMsg{font-size:.8em;}
     }
     @media only screen and (max-width: 528px), only screen and (max-height: 698px) {
-        .brnodisplay {display:block;}
-        .puzzledate {
+        #canvas-puzzle {
+            top:110px;
+        }
+        .puzzleDate {
             left:var(--standard_space);
             top:79px;
+            width:290px;
             font-weight:normal;
         }
-        .lblPuzzleNo {
+        .puzzleNo {
             left:var(--standard_space);
-            top:25px;
+            top:30px;
         }
         #puzzleNo{
-            left:23px;
-            top:25px;
-            width:var(--input_width_match_button);
+            left:87px;
         }
     }
     @media only screen and (max-width: 400px), only screen and (max-height: 572px) {
@@ -546,19 +569,19 @@
     <button id="undo" class="statusLine button" disabled="disabled">Undo Last</button>
 
     <br class="brnodisplay"/>
-    <span class="tip-wrapper">
+    <span class="puzzleNo">
         <label class="statusLine lblPuzzleNo tip-trigger" for="puzzleNo" aria-describedby="tip-puzzleno">Puzzle #: </label>
         <input id="puzzleNo" class="statusLine tip-trigger" aria-describedby="tip-puzzleno"></input>
         <div id="tip-puzzleno" role="tooltip">Enter a number and hit {Enter} to select a specific puzzle</div>
     </span>
 
-    <span class="puzzledate">
-        <span id="puzzledate"></span><span id="isSolved" class="tip-trigger isSolved" aria-describedby="tip-puzzlesolved"> *</span>
+    <span class="puzzleDate">
+        <span id="puzzleDate"></span><span id="isSolved" class="tip-trigger isSolved" aria-describedby="tip-puzzlesolved"> *</span>
         <div id="tip-puzzlesolved" role="tooltip">You have solved this puzzle!</div>
     </span>
 
     <!-- "Stats menu" -->
-    <a id="statsParent" class="menuicon" style="right:60px;" onclick="showStats()">
+    <a id="statsParent" class="menuicon" style="right:70px;" onclick="showStats()">
         <i id="statsParent" class="fa fa-line-chart"></i>
         <div id="stats" class="menuContent menuText">
             <!-- <h1 class="flipit">Daily FlipIT Stats</h1> -->
@@ -576,7 +599,7 @@
     </a>
     
     <!-- "Help menu" -->
-    <a id="helpParent" class="menuicon" style="right:30px;">
+    <a id="helpParent" class="menuicon" style="right:40px;">
         <i id="helpParent" class="fa fa-question-circle"></i>
         <div id="help" class="menuContent menuText">
             <div id="checkboxSlider" class="checkboxSlider menuTopper">
@@ -951,7 +974,7 @@ function btnTodaysPuzzle(init) {
 
     
     // must be after resetCircles()
-    document.getElementById("puzzledate").innerText = "Puzzle for " + mTodayDateText;
+    document.getElementById("puzzleDate").innerText = "Puzzle for " + mTodayDateText;
     mIsDaily = true;
     mTodayPuzzleNo = mCurrentPuzzleNo;
 
@@ -1171,7 +1194,7 @@ function drawCanvas(pattern, initialize) {
     if (viewWidth < mMinWidth) {viewWidth = mMinWidth;}
     mCanvas.height = viewWidth;
     mCanvas.width = viewWidth;
-    //document.getElementById("content").style.width = (mBorderLeft + viewWidth + mBorderRight) + "px";
+    document.getElementById("content").style.width = (mBorderLeft + viewWidth + mBorderRight) + "px";
     
     try {
         const rect = mCanvas.getBoundingClientRect();
@@ -1393,7 +1416,7 @@ function resetCircles(pattern, redrawToday) {
     mlblClicks.innerText = 0;
 
     if (redrawToday === false) {
-        document.getElementById("puzzledate").innerText = "";
+        document.getElementById("puzzleDate").innerText = "";
         document.getElementById("isSolved").style.display = "none";
         //document.querySelectorAll("#isSolved").forEach( (e) => {e.style.display = "none";} );
         document.getElementById("isSolved_tr").style.display = "none";
