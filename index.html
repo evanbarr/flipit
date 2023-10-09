@@ -30,7 +30,7 @@
 
 <style>
     :root {
-        --app_version: "1.09.017";
+        --app_version: "1.09.018";
 
         --clr_highlight_min: lightcyan;
         --clr_highlight_max: darkred;
@@ -54,11 +54,13 @@
         --button_width: 100px;
         --input_width_match_button: calc(var(--button_width) - 6px);
         --statusline_text_top: 24px;
+
+        --darkPreference: 0;
     }
     .darkMode {
         --clr_background: rgb(48, 48, 48);
         --clr_foreground: white;
-        --clr_disk_clicked: rgb(43, 48, 80);
+        --clr_disk_clicked: rgb(49, 55, 90);
 
         /* Unchanged
         --clr_highlight_min: lightcyan;
@@ -77,6 +79,8 @@
         --clr_border_tooltip: black;
         */
     }
+    @media screen and (prefers-color-scheme: dark) {:root {--darkPreference: 1;}}
+
     html {height:100%;}
     body {
         margin-top:0px;
@@ -512,8 +516,8 @@
         .menuItem {height:25px;}
         #help {
             width:330px;
-            padding-left:var(--standard_space);5
-            padding-right:var(--standard_space)
+            padding-left:var(--standard_space);
+            padding-right:var(--standard_space);
         }
         #stats {
             width:332px;
@@ -1678,11 +1682,14 @@ function saveStats() {
 
 
 function loadOptions() {
+    const prefersDark = (getComputedStyle(mDocRoot).getPropertyValue("--darkPreference") == 1);
     var data = window.localStorage.getItem(mDataOptionsName);
     if (data) {
         mDataOptions = JSON.parse(data);
-        if (typeof mDataOptions.darkMode === 'undefined') {mDataOptions.darkMode = false;}
+        if (typeof mDataOptions.darkMode === 'undefined') {mDataOptions.darkMode = prefersDark;}
         if (typeof mDataOptions.showClicks === 'undefined') {mDataOptions.showClicks = true;}
+    } else {
+        mDataOptions.darkMode = prefersDark;
     }
 
     document.getElementById("helpOnStart").checked = mDataOptions.helpOnStart;
