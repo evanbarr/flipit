@@ -30,7 +30,7 @@
 
 <style>
     :root {
-        --app_version: "1.09.018";
+        --app_version: "1.09.019";
 
         --clr_highlight_min: lightcyan;
         --clr_highlight_max: darkred;
@@ -1630,8 +1630,8 @@ function getSeedFromDate() {
     const now = new Date();
 
     const year = now.getUTCFullYear().toString();
-    const nMonth = now.getUTCMonth();
-    const month = months[nMonth];
+    const nMonth = now.getUTCMonth()+1;
+    const month = months[nMonth-1];
     const nDay = now.getUTCDate();
     const day = (nDay + 9).toString();  // add 9 to guarantee a 2 digit result.
     const weekday = weekdays[now.getUTCDay()];
